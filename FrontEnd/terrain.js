@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { createNoise2D } from 'simplex-noise';
 import seedrandom from 'seedrandom';
+import {Water} from "three/addons";
 
 
 class terrain{
@@ -165,3 +166,101 @@ export class Hill extends terrain {
     }
 }
 
+export class Grassland extends terrain {
+    constructor(camera, scene) {
+        super(camera, scene);
+
+        // 使用固定种子创建一致的噪声生成器
+        const rng = seedrandom('fixed-seed');
+        this.noise2D = createNoise2D(rng);
+
+        this.createTerrain();
+        this.createWaterSurface(); // 添加水面
+    }
+
+    GroundTexture() {
+        const groundTexture = this.textureLoader.load('./Resource/grass.png');  // 替换为您的草地纹理路径
+        groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+        groundTexture.repeat.set(100, 100);
+        return groundTexture;
+    }
+
+    generateHeight(x, z) {
+        const noiseScale = 0.005;
+        const maxHeight = 20;       // 高地的最大高度
+        const riverWidth = 20;      // 河流宽度
+        const hillRadius = 30;      // 高地的半径
+        const distanceFromCenter = Math.sqrt(x * x + z * z); // 到中心的距离
+
+        // 中心形成高地，周边为河流和草原
+        let height;
+        if (distanceFromCenter < hillRadius) {
+            // 在高地范围内，噪声高度逐渐增加
+            height = this.noise2D(x * noiseScale, z * noiseScale) * maxHeight * (1 - distanceFromCenter / hillRadius);
+        } else if (distanceFromCenter < hillRadius + riverWidth) {
+            // 在高地外围生成河流，降低该区域的高度
+            const riverDepth = 15;
+            height = -riverDepth * (1 - (distanceFromCenter - hillRadius) / riverWidth); // 靠近高地区域形成河流
+        } else {
+            // 更远的区域保持平缓起伏
+            height = this.noise2D(x * noiseScale, z * noiseScale) * (maxHeight / 4);
+        }
+        console.log(height);
+
+        return height;
+    }
+
+    createTerrain() {
+        this.planePositions.forEach(([x, y, z]) => {
+            const geometry = new THREE.PlaneGeometry(this.planeSize, this.planeSize, 100, 100);
+            geometry.rotateX(-Math.PI / 2);
+
+            for (let i = 0; i < geometry.attributes.position.count; i++) {
+                const vx = geometry.attributes.position.getX(i);
+                const vz = geometry.attributes.position.getZ(i);
+                const height = this.generateHeight(vx + x, vz + z);
+                geometry.attributes.position.setY(i, height);
+            }
+
+            geometry.computeVertexNormals();
+
+            const material = new THREE.MeshStandardMaterial({ map: this.groundTexture });
+            const plane = new THREE.Mesh(geometry, material);
+            plane.position.set(x-9, y-2, z+2);
+            this.scene.add(plane);
+            this.planes.push(plane);
+        });
+    }
+
+    createWaterSurface() {
+        // 创建水面几何体
+        const waterGeometry = new THREE.PlaneGeometry(this.planeSize * 3, this.planeSize * 3);
+
+        const water = new Water(waterGeometry, {
+            textureWidth: 512,
+            textureHeight: 512,
+            waterNormals: new THREE.TextureLoader().load(
+                './Resource/waternormals.jpg',
+                function (texture) {
+                    texture.wrapS = texture.wrapT = THREE.RepeatWrapping
+                }
+            ),
+            sunDirection: new THREE.Vector3(),
+            sunColor: 0xffffff,
+            waterColor: 0x001e0f,
+            distortionScale: 3.7,
+            fog: this.scene.fog !== undefined,
+        })
+
+        water.rotation.x = -Math.PI / 2;
+        water.position.y = -5; // 将水面置于河道最低位置以下
+        this.scene.add(water)
+
+        function animate() {
+            requestAnimationFrame(animate)
+            water.material.uniforms['time'].value += 1.0 / 60.0
+        }
+
+        animate();
+    }
+}

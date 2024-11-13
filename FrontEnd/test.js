@@ -3,7 +3,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { createNoise2D } from 'simplex-noise';
 import {Cloudy, Sunny, Sunset} from './sky.js';
-import {Desert, Hill} from './terrain.js'
+import {Desert, Grassland, Hill} from './terrain.js'
 
 // 创建场景、相机和渲染器
 const scene = new THREE.Scene();
@@ -66,7 +66,7 @@ loader.load(
     }
 );
 
-const ground=new Hill(camera,scene);
+const ground=new Grassland(camera,scene);
 
 const mySky=new Sunset();
 scene.add(mySky.getSky());
