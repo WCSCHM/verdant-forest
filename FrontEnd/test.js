@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { createNoise2D } from 'simplex-noise';
 import {Cloudy, Sunny, Sunset} from './sky.js';
 import {Desert, Grassland, Hill} from './terrain.js'
+import {Bird, handleDoubleClick} from "./bird";
 
 // 创建场景、相机和渲染器
 const scene = new THREE.Scene();
@@ -68,9 +69,12 @@ loader.load(
 
 const ground=new Grassland(camera,scene);
 
-const mySky=new Sunset();
-scene.add(mySky.getSky());
-scene.add(mySky.Light());
+const mySky=new Sunny(scene,camera);
+
+const bird1=new Bird(camera,scene,renderer,1);
+const bird2=new Bird(camera,scene,renderer,2);
+
+handleDoubleClick([bird1, bird2], renderer, camera, scene);
 
 // 添加方向光
 const directionalLight = new THREE.DirectionalLight(0xffffff, 2);

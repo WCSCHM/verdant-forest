@@ -1,10 +1,16 @@
 import * as THREE from 'three';
 import {Sky} from 'three/examples/jsm/objects/Sky.js';
 
+
+
+
 //晴天 10，3，0.005，0.7
 //阴天 20，0.5，0.1，0.8
 export class sky{
-    constructor(){
+    constructor(scene,camera){
+        this.scene=scene;
+        this.camera = camera;
+
         this.mySky = new Sky();
         this.mySun = new THREE.Vector3();
         this.mySky.scale.setScalar(10000); // 设置天空的范围，使其覆盖整个场景
@@ -35,8 +41,8 @@ export class sky{
 }
 
 export class Sunny extends sky{
-    constructor() {
-        super();
+    constructor(scene,camera) {
+        super(scene,camera);
         this.turbidity=0.8;
         this.rayleigh=0.4;
         this.mieCoefficient=0.002;
@@ -44,6 +50,8 @@ export class Sunny extends sky{
         this.Elevation=20;
         this.Azimuth=180;
         this.createSunnySky();
+        this.scene.add(this.mySky);
+        this.scene.add(this.Light());
     }
 
     Light(){
@@ -55,18 +63,26 @@ export class Sunny extends sky{
     createSunnySky(){
         super.setParam(this.turbidity,this.rayleigh,this.mieCoefficient,this.mieDirectionalG);
         super.Sun(this.Elevation,this.Azimuth);
+
     }
+
+    addCloud() {
+
+    }
+
 
 }
 
 export class Sunset extends sky{
-    constructor() {
-        super();
+    constructor(scene,camera) {
+        super(scene,camera);
         this.turbidity=10;
         this.rayleigh=2;
         this.mieCoefficient=0.005;
         this.mieDirectionalG=0.8;
         this.createSunsetSky();
+        this.scene.add(this.mySky);
+        this.scene.add(this.Light());
     }
 
     Sun(Elevation,Azimuth){
@@ -91,8 +107,8 @@ export class Sunset extends sky{
 }
 
 export class Cloudy extends sky{
-    constructor() {
-        super();
+    constructor(scene,camera) {
+        super(scene,camera);
         this.turbidity=20;
         this.rayleigh=1;
         this.mieCoefficient=0.1;
@@ -100,6 +116,8 @@ export class Cloudy extends sky{
         this.Elevation=5;
         this.Azimuth=100;
         this.createCloudySky();
+        this.scene.add(this.mySky);
+        this.scene.add(this.Light());
     }
 
     Light(){

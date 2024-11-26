@@ -205,8 +205,6 @@ export class Grassland extends terrain {
             // 更远的区域保持平缓起伏
             height = this.noise2D(x * noiseScale, z * noiseScale) * (maxHeight / 4);
         }
-        console.log(height);
-
         return height;
     }
 
