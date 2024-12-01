@@ -90,17 +90,6 @@ gltfLoader.load('Resource/oceanwave_1.glb', (gltf) => {
     scene.add(ocean_wave);
 });
 
-// 加载浇水壶模型
-let wateringCan;
-gltfLoader.load('Resource/watering_can.glb', (gltf) => {
-    wateringCan = gltf.scene;
-    wateringCan.scale.set(0.2, 0.2, 0.2);
-    wateringCan.position.set(10, 30, 10);  // 设置浇水位置
-    wateringCan.rotation.z = -Math.PI / 4;  // 倾斜浇水壶，使其向内倾斜
-    wateringCan.visible = false;  // 初始化时隐藏
-    scene.add(wateringCan);
-});
-
 // 添加切换树木按钮
 const treeButton = document.createElement('button');
 treeButton.innerText = '切换树木';
@@ -126,51 +115,6 @@ treeButton.addEventListener('click', () => {
 
         // 将新的树木模型添加到场景中
         scene.add(trees[currentTreeIndex]);
-    }
-});
-
-// 添加浇水按钮
-const waterButton = document.createElement('button');
-waterButton.innerText = '浇水';
-waterButton.style.position = 'absolute';
-waterButton.style.top = '20px';
-waterButton.style.right = '20px';
-waterButton.style.padding = '10px 20px';
-waterButton.style.backgroundColor = '#4CAF50';
-waterButton.style.color = 'white';
-waterButton.style.border = 'none';
-waterButton.style.borderRadius = '5px';
-waterButton.style.cursor = 'pointer';
-document.body.appendChild(waterButton);
-
-// 创建一个水流对象，但初始化时隐藏
-let waterFlow;
-function createWaterFlow() {
-    const geometry = new THREE.CylinderGeometry(0.2, 0.2, 5, 32);
-    const material = new THREE.MeshStandardMaterial({
-        color: 0x00BBFF,    // 蓝色水流
-        transparent: true,
-        opacity: 0.7
-    });
-    waterFlow = new THREE.Mesh(geometry, material);
-    waterFlow.rotation.x = Math.PI / 2;  // 水流方向向下
-    waterFlow.position.set(10, 27, 10);  // 设置水流的位置
-    waterFlow.visible = false;  // 初始不可见
-    scene.add(waterFlow);
-}
-createWaterFlow();
-
-// 处理浇水动画
-waterButton.addEventListener('click', () => {
-    if (wateringCan && waterFlow) {
-        wateringCan.visible = true;      // 显示浇水壶
-        waterFlow.visible = true;        // 显示水流
-
-        // 在2秒后移除浇水壶和水流
-        setTimeout(() => {
-            wateringCan.visible = false;
-            waterFlow.visible = false;
-        }, 2000);  // 2秒后消失
     }
 });
 
