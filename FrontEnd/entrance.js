@@ -358,7 +358,7 @@ function main() {
         }
 
         if (cnt < points.length) {
-            camera.position.copy(points[cnt++]);
+            camera.position.copy(points[cnt+=5]);
         } else if (!isIntroActive) {
             // 停止相机移动，进入欢迎界面
             isIntroActive = true;
