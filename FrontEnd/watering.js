@@ -120,8 +120,7 @@ export class WateringEffect {
     startEffect(position) {
         const wormhole = this.createWormhole(position);
         const waterFlow = this.createWaterFlow(position);
-
-        // 设置持续时间为 5 秒
+        
         const duration = 4;
 
         this.activeEffects.push({ wormhole, waterFlow, startTime: this.clock.getElapsedTime(), duration });
