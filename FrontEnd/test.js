@@ -23,7 +23,7 @@ let timeUniform = { value: 0 };
 // 加载 GLB 模型
 const loader = new GLTFLoader();
 loader.load(
-    './Resource/ja19_tsuga_diversifolia_japanese_hemlock.glb',
+    './Resource/realistic_hd_mountain_hemlock_1943.glb',
     (gltf) => {
         const treeModel = gltf.scene;
 
