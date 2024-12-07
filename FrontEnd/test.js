@@ -5,6 +5,7 @@ import { createNoise2D } from 'simplex-noise';
 import {Cloudy, Sunny, Sunset} from './sky.js';
 import {Desert, Grassland, Hill} from './terrain.js'
 import {Bird, handleDoubleClick} from "./bird";
+import {Rain} from "./Rains";
 
 // 创建场景、相机和渲染器
 const scene = new THREE.Scene();
@@ -69,7 +70,10 @@ loader.load(
 
 const ground=new Grassland(camera,scene);
 
-const mySky=new Sunny(scene,camera);
+const mySky=new Cloudy(scene,camera);
+
+const rain=new Rain(scene,camera,renderer);
+
 
 const bird1=new Bird(camera,scene,renderer,1);
 const bird2=new Bird(camera,scene,renderer,2);
