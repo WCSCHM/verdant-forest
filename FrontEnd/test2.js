@@ -1,11 +1,12 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { createNoise2D } from 'simplex-noise';
-import { Cloudy, Sunny, Sunset } from './sky.js';
-import { Desert, Grassland, Hill } from './terrain.js';
-import { Bird, handleDoubleClick } from './bird';
-import { Tree } from './tree.js';
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
+import {createNoise2D} from 'simplex-noise';
+import {Cloudy, Sunny, Sunset} from './sky.js';
+import {Desert, Grassland, Hill} from './terrain.js';
+import {Bird, handleDoubleClick} from './bird';
+import {Tree} from './tree.js';
+import {WateringEffect} from './watering'
 
 // 创建场景、相机和渲染器
 const scene = new THREE.Scene();
@@ -19,7 +20,9 @@ document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
-let timeUniform = { value: 0 };
+let timeUniform = {value: 0};
+
+const wateringEffect = new WateringEffect(scene);
 
 // 创建多个树实例
 const tree1 = new Tree(scene, [0, 0, 0], [5]);
@@ -106,7 +109,7 @@ switchButton.addEventListener('click', () => {
 // document.body.appendChild(treeSelect);
 
 // 假设有6种树对象，分别是 tree1, tree2, ..., tree6
-const trees = [tree1, tree2, tree3,tree4];
+const trees = [tree1, tree2, tree3, tree4];
 
 // // 处理选择树的切换
 // treeSelect.addEventListener('change', (event) => {
@@ -175,10 +178,10 @@ previewButton.addEventListener('click', () => {
 // 为每种树种创建一个小型的 Three.js 场景
 // 初始化树模型配置数组
 const treeModels = [
-    { path: './Resource/tree1-3.glb', scale: [0.35, 0.35, 0.35] },  // 默认比例
-    { path: './Resource/tree2-3.glb', scale: [0.85, 0.85, 0.85] },  // 比较小
-    { path: './Resource/tree3-3.glb', scale: [0.25, 0.25, 0.25] },  // 放大
-    { path: './Resource/willow-3.glb', scale: [0.25, 0.25, 0.25] }   // 缩小很多
+    {path: './Resource/tree1-3.glb', scale: [0.35, 0.35, 0.35]},  // 默认比例
+    {path: './Resource/tree2-3.glb', scale: [0.85, 0.85, 0.85]},  // 比较小
+    {path: './Resource/tree3-3.glb', scale: [0.25, 0.25, 0.25]},  // 放大
+    {path: './Resource/willow-3.glb', scale: [0.25, 0.25, 0.25]}   // 缩小很多
 ];
 const previewScenes = [];
 const previewCameras = [];
@@ -191,7 +194,7 @@ treeModels.forEach((modelConfig, index) => {
     const previewCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
     previewCamera.position.set(0, 1.5, 4);
 
-    const previewRenderer = new THREE.WebGLRenderer({ alpha: true });
+    const previewRenderer = new THREE.WebGLRenderer({alpha: true});
     previewRenderer.setSize(250, 230);
     previewRenderer.setClearColor(0x000000, 0); // 透明背景
 
@@ -228,14 +231,14 @@ treeModels.forEach((modelConfig, index) => {
 
     // 添加选择点击事件
     previewElement.addEventListener('click', () => {
-        if(currentTree) {
+        if (currentTree) {
             currentTree.hideAllModels();
         }
 
         // 选择对应的树种
         currentTree = trees[index];
-        if(currentTree) {
-            currentTree.currentModelIndex=-1;
+        if (currentTree) {
+            currentTree.currentModelIndex = -1;
             currentTree.switchModel();
         }
 
@@ -271,6 +274,26 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
 directionalLight.position.set(10, 50, 50);
 scene.add(directionalLight);
 
+// 添加按钮触发浇水
+const waterButton = document.createElement('button');
+waterButton.innerText = '浇水';
+waterButton.style.position = 'absolute';
+waterButton.style.top = '20px';
+waterButton.style.right = '20px'; // 放置在右侧
+waterButton.style.padding = '10px 20px';
+waterButton.style.backgroundColor = '#4CAF50';
+waterButton.style.color = 'white';
+waterButton.style.border = 'none';
+waterButton.style.borderRadius = '5px';
+waterButton.style.cursor = 'pointer';
+document.body.appendChild(waterButton);
+
+// 点击按钮时触发浇水效果
+waterButton.addEventListener('click', () => {
+    const treePosition = new THREE.Vector3(0, 100, 0); // 假设这是树的位置
+    wateringEffect.startEffect(treePosition);
+});
+
 // 渲染循环
 function animate() {
     requestAnimationFrame(animate);
@@ -285,8 +308,10 @@ function animate() {
 
     ground.updateTerrain();
     controls.update();
+    wateringEffect.update()
     renderer.render(scene, camera);
 }
+
 animate();
 
 // 处理窗口大小调整
