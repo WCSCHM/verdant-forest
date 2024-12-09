@@ -10,6 +10,7 @@ export class Tree {
         this.currentModelIndex = 0; // 当前展示的模型索引
         this.treeObject = null; // 当前加载的树模型对象
         this.loader = new GLTFLoader(); // GLB 模型加载器
+        this.timeOffset = Math.random() * 100; // 每棵树随机偏移时间
     }
 
     /**
@@ -49,6 +50,16 @@ export class Tree {
             .catch(() => {
                 this.modelsLoaded = false;
             });
+    }
+
+    // 控制模型的摇动
+    sway(time) {
+        if (this.models.length > 0 && this.currentModelIndex >= 0) {
+            const model = this.models[this.currentModelIndex];
+            const windStrength = 0.0025; // 摆动强度
+            const swayAngle = Math.sin(time + this.timeOffset) * windStrength;
+            model.rotation.z = swayAngle; // 绕Z轴摇摆
+        }
     }
 
 // 在切换模型时检查是否加载完成
