@@ -81,6 +81,34 @@ tree4.loadModels(
     ]
 );
 
+const tree5 = new Tree(scene, [0, 0, 0], [5]);
+tree5.loadModels(
+    [
+        './Resource/tree4-1.glb', // 模型1路径
+        './Resource/tree4-2.glb', // 模型2路径
+        './Resource/tree4-3.glb'  // 模型3路径
+    ],
+    [
+        1, // willow-1.glb 的缩放比例
+        30, // willow-2.glb 的缩放比例
+        60  // willow-3.glb 的缩放比例
+    ]
+);
+
+const tree6 = new Tree(scene, [0, 0, 0], [5]);
+tree6.loadModels(
+    [
+        './Resource/tree6-1.glb', // 模型1路径
+        './Resource/tree6-2.glb', // 模型2路径
+        './Resource/tree6-3.glb'  // 模型3路径
+    ],
+    [
+        3, // tree6-1.glb 的缩放比例
+        1.5, // tree6-2.glb 的缩放比例
+        0.1  // tree6-3.glb 的缩放比例
+    ]
+);
+
 // 当前选择的树
 let currentTree = tree1;
 
@@ -109,7 +137,7 @@ switchButton.addEventListener('click', () => {
 // document.body.appendChild(treeSelect);
 
 // 假设有6种树对象，分别是 tree1, tree2, ..., tree6
-const trees = [tree1, tree2, tree3, tree4];
+const trees = [tree1, tree2, tree3, tree4, tree5, tree6];
 
 // // 处理选择树的切换
 // treeSelect.addEventListener('change', (event) => {
@@ -178,10 +206,12 @@ previewButton.addEventListener('click', () => {
 // 为每种树种创建一个小型的 Three.js 场景
 // 初始化树模型配置数组
 const treeModels = [
-    {path: './Resource/tree1-3.glb', scale: [0.35, 0.35, 0.35]},  // 默认比例
-    {path: './Resource/tree2-3.glb', scale: [0.85, 0.85, 0.85]},  // 比较小
-    {path: './Resource/tree3-3.glb', scale: [0.25, 0.25, 0.25]},  // 放大
-    {path: './Resource/willow-3.glb', scale: [0.25, 0.25, 0.25]}   // 缩小很多
+    {path: './Resource/tree1-3.glb', scale: [0.35, 0.35, 0.35]},
+    {path: './Resource/tree2-3.glb', scale: [0.85, 0.85, 0.85]},
+    {path: './Resource/tree3-3.glb', scale: [0.25, 0.25, 0.25]},
+    {path: './Resource/willow-3.glb', scale: [0.25, 0.25, 0.25]}, 
+    {path: './Resource/tree4-3.glb', scale: [5.5, 5.5, 5.5]},
+    {path: './Resource/tree6-3.glb', scale: [0.01, 0.01, 0.01]}
 ];
 const previewScenes = [];
 const previewCameras = [];
@@ -300,6 +330,11 @@ function animate() {
 
     // 更新 time 值用于风的效果
     timeUniform.value += 0.01;
+
+    // 控制所有树随风摇摆
+    trees.forEach((tree) => {
+        tree.sway(timeUniform.value);
+    });
 
     const minHeight = 2;
     if (camera.position.y < minHeight) {
