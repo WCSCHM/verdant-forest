@@ -290,7 +290,7 @@ document.body.appendChild(waterButton);
 
 // 点击按钮时触发浇水效果
 waterButton.addEventListener('click', () => {
-    const treePosition = new THREE.Vector3(0, 100, 0); // 假设这是树的位置
+    const treePosition = new THREE.Vector3(5, 5, 0); // 假设这是树的位置
     wateringEffect.startEffect(treePosition);
 });
 
