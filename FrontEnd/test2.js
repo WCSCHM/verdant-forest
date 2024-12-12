@@ -7,6 +7,11 @@ import {Desert, Grassland, Hill} from './terrain.js';
 import {Bird, handleDoubleClick} from './bird';
 import {Tree} from './tree.js';
 import {WateringEffect} from './watering'
+import { setupCoinsUI } from './coins.js';
+
+// 当前用户 ID 和后端 API 地址
+const userId = 1;
+const apiUrl = 'http://localhost:3008';
 
 // 创建场景、相机和渲染器
 const scene = new THREE.Scene();
@@ -23,6 +28,9 @@ controls.enableDamping = true;
 let timeUniform = {value: 0};
 
 const wateringEffect = new WateringEffect(scene);
+
+// 设置金币 UI
+setupCoinsUI(userId, apiUrl);
 
 // 创建多个树实例
 const tree1 = new Tree(scene, [0, 0, 0], [5]);
@@ -209,7 +217,7 @@ const treeModels = [
     {path: './Resource/tree1-3.glb', scale: [0.35, 0.35, 0.35]},
     {path: './Resource/tree2-3.glb', scale: [0.85, 0.85, 0.85]},
     {path: './Resource/tree3-3.glb', scale: [0.25, 0.25, 0.25]},
-    {path: './Resource/willow-3.glb', scale: [0.25, 0.25, 0.25]}, 
+    {path: './Resource/willow-3.glb', scale: [0.25, 0.25, 0.25]},
     {path: './Resource/tree4-3.glb', scale: [5.5, 5.5, 5.5]},
     {path: './Resource/tree6-3.glb', scale: [0.01, 0.01, 0.01]}
 ];
