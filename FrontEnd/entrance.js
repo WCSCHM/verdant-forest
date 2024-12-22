@@ -335,7 +335,7 @@ function main() {
 
         // 添加点击事件监听器
         document.addEventListener('click', () => {
-            window.location.href = "Scene.html"; // 跳转到指定HTML文件
+            window.location.href = "login.html"; // 跳转到指定HTML文件
         });
 
         // 动画效果的样式表
