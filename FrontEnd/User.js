@@ -1,12 +1,12 @@
 (function () {
-    // ============== 基础数据配置（可根据实际需求动态获取） ==============
-    const userId = 1;
-    const apiUrl = 'http://localhost:3008';
-    const username = '用户1';        // 从后端或其他方式获取的用户名
-    const userCoins = 111;           // 从后端或其他方式获取的用户金币
+  // ============== 基础数据配置 ==============
+  const userId = 1;
+  const apiUrl = 'http://localhost:3008';
+  const username = `用户${userId}`;
+  let userCoins = '加载中...'; // 初始值设置为“加载中...”
 
-    // ============== 创建样式 ==============
-    const style = `
+  // ============== 创建样式 ==============
+  const style = `
     /* 引入 Google Fonts */
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Exo+2:wght@600&display=swap');
 
@@ -199,35 +199,35 @@
     }
   `;
 
-    // ============== 将样式插入到页面中 ==============
-    const styleEl = document.createElement('style');
-    styleEl.textContent = style;
-    document.head.appendChild(styleEl);
+  // ============== 将样式插入到页面中 ==============
+  const styleEl = document.createElement('style');
+  styleEl.textContent = style;
+  document.head.appendChild(styleEl);
 
-    // ============== 创建背景花纹层 ==============
-    const backgroundPattern = document.createElement('div');
-    backgroundPattern.id = 'backgroundPattern';
-    document.body.appendChild(backgroundPattern);
+  // ============== 创建背景花纹层 ==============
+  const backgroundPattern = document.createElement('div');
+  backgroundPattern.id = 'backgroundPattern';
+  document.body.appendChild(backgroundPattern);
 
-    // ============== 创建边沿动画层 ==============
-    const borderAnimation = document.createElement('div');
-    borderAnimation.id = 'borderAnimation';
-    document.body.appendChild(borderAnimation);
+  // ============== 创建边沿动画层 ==============
+  const borderAnimation = document.createElement('div');
+  borderAnimation.id = 'borderAnimation';
+  document.body.appendChild(borderAnimation);
 
-    // ============== 创建页面主容器 ==============
-    const fancyContainer = document.createElement('div');
-    fancyContainer.id = 'fancyContainer';
-    document.body.appendChild(fancyContainer);
+  // ============== 创建页面主容器 ==============
+  const fancyContainer = document.createElement('div');
+  fancyContainer.id = 'fancyContainer';
+  document.body.appendChild(fancyContainer);
 
-    // ============== 左上角：图案 + 用户名 ==============
-    const userInfo = document.createElement('div');
-    userInfo.id = 'userInfo';
+  // ============== 左上角：图案 + 用户名 ==============
+  const userInfo = document.createElement('div');
+  userInfo.id = 'userInfo';
 
-    // —— 自定义一个 SVG 图案（可根据喜好修改） ——
-    const patternIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    patternIcon.setAttribute('id', 'patternIcon');
-    patternIcon.setAttribute('viewBox', '0 0 100 100');
-    patternIcon.innerHTML = `
+  // —— 自定义一个 SVG 图案（可根据喜好修改） ——
+  const patternIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  patternIcon.setAttribute('id', 'patternIcon');
+  patternIcon.setAttribute('viewBox', '0 0 100 100');
+  patternIcon.innerHTML = `
     <defs>
       <radialGradient id="patternGradient" cx="50%" cy="50%" r="50%">
         <stop offset="0%"   stop-color="#fffacd" />
@@ -237,25 +237,25 @@
     <circle cx="50" cy="50" r="40" fill="url(#patternGradient)" />
     <path d="M50 10 Q90 10 90 50 T50 90 T10 50 T50 10" fill="none" stroke="#fffacd" stroke-width="3" />
   `;
-    userInfo.appendChild(patternIcon);
+  userInfo.appendChild(patternIcon);
 
-    // —— 用户名文本 ——
-    const usernameText = document.createElement('div');
-    usernameText.id = 'usernameText';
-    usernameText.textContent = username;
-    userInfo.appendChild(usernameText);
+  // —— 用户名文本 ——
+  const usernameText = document.createElement('div');
+  usernameText.id = 'usernameText';
+  usernameText.textContent = username;
+  userInfo.appendChild(usernameText);
 
-    fancyContainer.appendChild(userInfo);
+  fancyContainer.appendChild(userInfo);
 
-    // ============== 右上角：金币图案 + 金币数字 ==============
-    const coinInfo = document.createElement('div');
-    coinInfo.id = 'coinInfo';
+  // ============== 右上角：金币图案 + 金币数字 ==============
+  const coinInfo = document.createElement('div');
+  coinInfo.id = 'coinInfo';
 
-    // —— 自定义一个金币 SVG 图案（可根据喜好修改） ——
-    const coinIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    coinIcon.setAttribute('id', 'coinIcon');
-    coinIcon.setAttribute('viewBox', '0 0 100 100');
-    coinIcon.innerHTML = `
+  // —— 自定义一个金币 SVG 图案（可根据喜好修改） ——
+  const coinIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  coinIcon.setAttribute('id', 'coinIcon');
+  coinIcon.setAttribute('viewBox', '0 0 100 100');
+  coinIcon.innerHTML = `
     <defs>
       <radialGradient id="coinGradient" cx="50%" cy="50%" r="50%">
         <stop offset="0%"   stop-color="#fffacd" />
@@ -265,44 +265,75 @@
     <circle cx="50" cy="50" r="40" fill="url(#coinGradient)" stroke="#fffacd" stroke-width="2"/>
     <text x="50" y="57" font-size="40" fill="#2e8b57" text-anchor="middle" alignment-baseline="middle" font-weight="bold">$</text>
   `;
-    coinInfo.appendChild(coinIcon);
+  coinInfo.appendChild(coinIcon);
 
-    // —— 金币数量文本 ——
-    const coinCount = document.createElement('div');
-    coinCount.id = 'coinCount';
-    coinCount.textContent = userCoins;
-    coinInfo.appendChild(coinCount);
+  // —— 金币数量文本 ——
+  const coinCount = document.createElement('div');
+  coinCount.id = 'coinCount';
+  coinCount.textContent = userCoins; // 初始显示“加载中...”
+  coinInfo.appendChild(coinCount);
 
-    fancyContainer.appendChild(coinInfo);
+  fancyContainer.appendChild(coinInfo);
 
-    // ============== 中心两个大按钮 ==============
-    const centerButtons = document.createElement('div');
-    centerButtons.id = 'centerButtons';
+  // ============== 中心两个大按钮 ==============
+  const centerButtons = document.createElement('div');
+  centerButtons.id = 'centerButtons';
 
-    // —— 按钮 1：获取金币 ——
-    const getCoinsButton = document.createElement('div');
-    getCoinsButton.classList.add('bigButton');
-    getCoinsButton.onclick = function () {
-        // 例如：window.location.href = './getCoins.html';
-    };
-    const btnText1 = document.createElement('span');
-    btnText1.classList.add('btnText');
-    btnText1.textContent = '获取金币';
-    getCoinsButton.appendChild(btnText1);
+  // —— 按钮 1：获取金币 ——
+  const getCoinsButton = document.createElement('div');
+  getCoinsButton.classList.add('bigButton');
+  getCoinsButton.onclick = function () {
+    // 例如：window.location.href = './getCoins.html';
+  };
+  const btnText1 = document.createElement('span');
+  btnText1.classList.add('btnText');
+  btnText1.textContent = '获取金币';
+  getCoinsButton.appendChild(btnText1);
 
-    // —— 按钮 2：种植树木 ——
-    const plantTreeButton = document.createElement('div');
-    plantTreeButton.classList.add('bigButton');
-    plantTreeButton.onclick = function () {
-        window.location.href = "Scene.html";
-    };
-    const btnText2 = document.createElement('span');
-    btnText2.classList.add('btnText');
-    btnText2.textContent = '种植树木';
-    plantTreeButton.appendChild(btnText2);
+  // —— 按钮 2：种植树木 ——
+  const plantTreeButton = document.createElement('div');
+  plantTreeButton.classList.add('bigButton');
+  plantTreeButton.onclick = function () {
+    window.location.href = "Scene.html";
+  };
+  const btnText2 = document.createElement('span');
+  btnText2.classList.add('btnText');
+  btnText2.textContent = '种植树木';
+  plantTreeButton.appendChild(btnText2);
 
-    centerButtons.appendChild(getCoinsButton);
-    centerButtons.appendChild(plantTreeButton);
+  centerButtons.appendChild(getCoinsButton);
+  centerButtons.appendChild(plantTreeButton);
 
-    fancyContainer.appendChild(centerButtons);
+  fancyContainer.appendChild(centerButtons);
+
+  // ============== 从后端获取金币数量并更新页面 ==============
+  async function fetchUserCoins(userId) {
+    try {
+      const response = await fetch(`${apiUrl}/users/${userId}/coins`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('用户不存在');
+        } else {
+          throw new Error(`请求失败: ${response.status}`);
+        }
+      }
+      const data = await response.json();
+      return data.coins;
+    } catch (error) {
+      console.error('获取金币失败:', error.message);
+      return null;
+    }
+  }
+
+  // 调用函数并更新金币数量
+  fetchUserCoins(userId)
+      .then(coins => {
+        if (coins !== null) {
+          userCoins = coins;
+          coinCount.textContent = userCoins;
+        } else {
+          coinCount.textContent = '加载失败';
+        }
+      });
+
 })();
