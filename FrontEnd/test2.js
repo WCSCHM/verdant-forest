@@ -415,16 +415,17 @@ function submitAnswer(questionId, selectedOption) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, questionId, selectedOption })
     })
-        .then(response => response.json())
-        .then(data => {
-            alert(data.message);
-            document.body.removeChild(document.querySelector('div[style*="z-index: 1000"]'));
-            if (data.success) {
-                // 如果答题正确，更新金币显示
-                fetchCoins();
-            }
-        })
-        .catch(error => console.error('Error submitting answer:', error));
+
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+        document.body.removeChild(document.querySelector('div[style*="z-index: 1000"]'));
+        if (data.success) {
+            // 如果答题正确，更新金币显示
+            fetchCoins();
+        }
+    })
+    .catch(error => console.error('Error submitting answer:', error));
 }
 
 // 渲染循环

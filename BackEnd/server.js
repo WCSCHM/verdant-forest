@@ -170,7 +170,63 @@ app.put('/users/:id/coins', (req, res) => {
   });
 });
 
+// 路由：用户登录
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+  const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
+  db.query(query, [username, password], (err, results) => {
+    if (err) {
+      console.error('登录失败:', err);
+      res.status(500).json({ error: '无法登录' });
+      return;
+    }
+    if (results.length > 0) {
+      res.json({ success: true });
+    } else {
+      res.status(401).json({ success: false, error: '用户名或密码错误' });
+    }
+  });
+});
 
+// 路由：获取随机题目
+app.get('/question', (req, res) => {
+  const query = 'SELECT * FROM questions ORDER BY RAND() LIMIT 1';
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('获取题目失败:', err);
+      res.status(500).json({ error: '无法获取题目' });
+      return;
+    }
+    res.json(results[0]);
+  });
+});
+
+// 路由：验证答案并更新金币
+app.post('/answer', (req, res) => {
+  const { userId, questionId, selectedOption } = req.body;
+  const query = 'SELECT correct_option FROM questions WHERE id = ?';
+  db.query(query, [questionId], (err, results) => {
+    if (err) {
+      console.error('验证答案失败:', err);
+      res.status(500).json({ error: '无法验证答案' });
+      return;
+    }
+    if (results.length > 0 && results[0].correct_option === selectedOption) {
+      // 答对题目，增加金币
+      const updateCoinsQuery = 'UPDATE users SET coins = coins + 10 WHERE id = ?';
+      db.query(updateCoinsQuery, [userId], (err) => {
+        if (err) {
+          console.error('更新金币失败:', err);
+          res.status(500).json({ error: '无法更新金币' });
+          return;
+        }
+        res.json({ success: true, message: '答对了！金币增加10个。' });
+      });
+    } else {
+      res.json({ success: false, message: '答错了，请再试一次。' });
+    }
+  });
+});
 
 // 启动服务器
 app.listen(port, () => {
