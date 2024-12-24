@@ -283,7 +283,7 @@
     const getCoinsButton = document.createElement('div');
     getCoinsButton.classList.add('bigButton');
     getCoinsButton.onclick = function () {
-        // 例如：window.location.href = './getCoins.html';
+      window.location.href = './quiz.html';
     };
     const btnText1 = document.createElement('span');
     btnText1.classList.add('btnText');

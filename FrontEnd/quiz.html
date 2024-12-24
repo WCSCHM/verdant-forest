@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>答题界面</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: url('./Resource/background2.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+        .quiz-container {
+            background: rgba(255, 255, 255, 0.85);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 500px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+        }
+        button {
+            display: block;
+            margin: 15px auto;
+            padding: 12px 25px;
+            width: 85%;
+            border: none;
+            border-radius: 10px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+        #closeButton {
+            background-color: #f44336;
+        }
+        #closeButton:hover {
+            background-color: #e53935;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container" id="quizContainer">
+        <h2 id="questionText">加载中...</h2>
+        <button id="optionA">选项A</button>
+        <button id="optionB">选项B</button>
+        <button id="optionC">选项C</button>
+        <button id="optionD">选项D</button>
+        <button id="closeButton">关闭</button>
+    </div>
+    <script>
+        const userId = 1; // 当前用户 ID
+        const apiUrl = 'http://localhost:3008'; // 后端 API 地址
+
+        function loadQuestion() {
+            fetch(`${apiUrl}/question`)
+                .then(response => response.json())
+                .then(question => {
+                    document.getElementById('questionText').innerText = question.question_text;
+                    document.getElementById('optionA').innerText = question.option_a;
+                    document.getElementById('optionB').innerText = question.option_b;
+                    document.getElementById('optionC').innerText = question.option_c;
+                    document.getElementById('optionD').innerText = question.option_d;
+
+                    ['A', 'B', 'C', 'D'].forEach(option => {
+                        document.getElementById(`option${option}`).onclick = () => submitAnswer(question.id, option);
+                    });
+                })
+                .catch(error => console.error('Error fetching question:', error));
+        }
+
+        function submitAnswer(questionId, selectedOption) {
+            fetch(`${apiUrl}/answer`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, questionId, selectedOption })
+            })
+            .then(response => response.json())
+            .then(data => {
+                window.location.href = 'User.html'; // 返回 User.html
+                alert(data.message);
+                if (data.success) {
+                    window.opener.fetchCoins(); // 更新金币显示
+                }
+            })
+            .catch(error => console.error('Error submitting answer:', error));
+        }
+
+        document.getElementById('closeButton').onclick = () => window.location.href = 'User.html';
+
+        loadQuestion();
+    </script>
+</body>
+</html> 
