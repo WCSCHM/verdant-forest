@@ -29,8 +29,8 @@ let timeUniform = {value: 0};
 
 const wateringEffect = new WateringEffect(scene);
 
-// 设置金币 UI
-setupCoinsUI(userId, apiUrl);
+// 设置金币 UI 并获取 fetchCoins 函数
+const fetchCoins = setupCoinsUI(userId, apiUrl);
 
 // 创建多个树实例
 const tree1 = new Tree(scene, [0, 0, 0], [5]);
@@ -331,6 +331,101 @@ waterButton.addEventListener('click', () => {
     const treePosition = new THREE.Vector3(5, 5, 0); // 假设这是树的位置
     wateringEffect.startEffect(treePosition);
 });
+
+// 创建答题按钮
+const quizButton = document.createElement('button');
+quizButton.innerText = '答题';
+quizButton.style.position = 'absolute';
+quizButton.style.top = '80px';
+quizButton.style.left = '10px';
+document.body.appendChild(quizButton);
+
+quizButton.addEventListener('click', () => {
+    fetch(`${apiUrl}/question`)
+        .then(response => response.json())
+        .then(question => {
+            showQuiz(question);
+        })
+        .catch(error => console.error('Error fetching question:', error));
+});
+
+function showQuiz(question) {
+    const quizContainer = document.createElement('div');
+    quizContainer.style.position = 'absolute';
+    quizContainer.style.top = '50%';
+    quizContainer.style.left = '50%';
+    quizContainer.style.transform = 'translate(-50%, -50%)';
+    quizContainer.style.background = 'rgba(255, 255, 255, 0.95)';
+    quizContainer.style.padding = '30px';
+    quizContainer.style.borderRadius = '15px';
+    quizContainer.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+    quizContainer.style.textAlign = 'center';
+    quizContainer.style.zIndex = '1000';
+    quizContainer.style.width = '500px';
+
+    const questionText = document.createElement('h2');
+    questionText.innerText = question.question_text;
+    questionText.style.marginBottom = '20px';
+    questionText.style.fontSize = '1.2rem';
+    questionText.style.color = '#333';
+    quizContainer.appendChild(questionText);
+
+    ['A', 'B', 'C', 'D'].forEach(option => {
+        const optionButton = document.createElement('button');
+        optionButton.innerText = question[`option_${option.toLowerCase()}`];
+        optionButton.style.display = 'block';
+        optionButton.style.margin = '10px auto';
+        optionButton.style.padding = '10px 20px';
+        optionButton.style.width = '80%';
+        optionButton.style.border = 'none';
+        optionButton.style.borderRadius = '5px';
+        optionButton.style.backgroundColor = '#4CAF50';
+        optionButton.style.color = 'white';
+        optionButton.style.fontSize = '1rem';
+        optionButton.style.cursor = 'pointer';
+        optionButton.style.transition = 'background 0.3s';
+        optionButton.onmouseover = () => optionButton.style.backgroundColor = '#45a049';
+        optionButton.onmouseout = () => optionButton.style.backgroundColor = '#4CAF50';
+        optionButton.onclick = () => submitAnswer(question.id, option);
+        quizContainer.appendChild(optionButton);
+    });
+
+    const closeButton = document.createElement('button');
+    closeButton.innerText = '关闭';
+    closeButton.style.marginTop = '20px';
+    closeButton.style.padding = '10px 20px';
+    closeButton.style.border = 'none';
+    closeButton.style.borderRadius = '5px';
+    closeButton.style.backgroundColor = '#f44336';
+    closeButton.style.color = 'white';
+    closeButton.style.fontSize = '1rem';
+    closeButton.style.cursor = 'pointer';
+    closeButton.style.transition = 'background 0.3s';
+    closeButton.onmouseover = () => closeButton.style.backgroundColor = '#e53935';
+    closeButton.onmouseout = () => closeButton.style.backgroundColor = '#f44336';
+    closeButton.onclick = () => document.body.removeChild(quizContainer);
+    quizContainer.appendChild(closeButton);
+
+    document.body.appendChild(quizContainer);
+}
+
+function submitAnswer(questionId, selectedOption) {
+    fetch(`${apiUrl}/answer`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, questionId, selectedOption })
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+        document.body.removeChild(document.querySelector('div[style*="z-index: 1000"]'));
+        if (data.success) {
+            // 如果答题正确，更新金币显示
+            fetchCoins();
+        }
+    })
+    .catch(error => console.error('Error submitting answer:', error));
+}
 
 // 渲染循环
 function animate() {

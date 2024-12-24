@@ -64,4 +64,7 @@ export function setupCoinsUI(userId, apiUrl) {
 
     // 初始化获取金币数量
     fetchCoins();
+
+    // 返回 fetchCoins 函数以便在其他地方使用
+    return fetchCoins;
 }
