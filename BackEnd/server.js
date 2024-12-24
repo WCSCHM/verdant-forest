@@ -228,6 +228,24 @@ app.post('/answer', (req, res) => {
   });
 });
 
+// 路由：获取用户ID
+app.post('/getUserId', (req, res) => {
+  const { username, password } = req.body;
+  const query = 'SELECT id FROM users WHERE username = ? AND password = ?';
+  db.query(query, [username, password], (err, results) => {
+    if (err) {
+      console.error('获取用户ID失败:', err);
+      res.status(500).json({ error: '无法获取用户ID' });
+      return;
+    }
+    if (results.length > 0) {
+      res.json({ success: true, userId: results[0].id });
+    } else {
+      res.status(401).json({ success: false, error: '用户名或密码错误' });
+    }
+  });
+});
+
 // 启动服务器
 app.listen(port, () => {
   console.log(`服务器加载成功`);

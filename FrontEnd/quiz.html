@@ -62,7 +62,7 @@
         <button id="closeButton">关闭</button>
     </div>
     <script>
-        const userId = 1; // 当前用户 ID
+        const userId = localStorage.getItem('userId');
         const apiUrl = 'http://localhost:3008'; // 后端 API 地址
 
         function loadQuestion() {

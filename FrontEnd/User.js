@@ -1,6 +1,6 @@
 (function () {
   // ============== 基础数据配置 ==============
-  const userId = 1;
+  const userId = localStorage.getItem('userId');
   const apiUrl = 'http://localhost:3008';
   const username = `用户${userId}`;
   let userCoins = '加载中...'; // 初始值设置为“加载中...”

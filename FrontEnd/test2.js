@@ -8,10 +8,8 @@ import { Bird, handleDoubleClick } from './bird';
 import { Tree } from './tree.js';
 import { WateringEffect } from './watering';
 
-// ------------------------------
-// 当前用户 ID 和后端 API 地址（如果有后端可替换）
-// ------------------------------
-const userId = 1;
+// 从 localStorage 获取用户 ID
+const userId = localStorage.getItem('userId');
 const apiUrl = 'http://localhost:3008';
 
 // ------------------------------
@@ -492,7 +490,6 @@ waterButton.addEventListener('click', async () => {
 // ------------------------------
 function animate() {
     requestAnimationFrame(animate);
-
     // 更新 time 用于风的效果
     timeUniform.value += 0.01;
 
