@@ -13,7 +13,6 @@ import {Octree} from "./lib/Octree";
 import {GUIController} from "./lib/GUIController";
 import {toSeePoint} from "./utilities";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
-import Stats from "three/examples/jsm/libs/stats.module.js";
 import {FlowerBuilder} from "./FlowerBuilder";
 
 function main() {
@@ -23,8 +22,6 @@ function main() {
     //   throw new Error("No WebGPU support");
     // }
     const canvas = document.querySelector("#c");
-    const stats = new Stats();
-    document.body.appendChild(stats.domElement);
     const renderer = new THREE.WebGLRenderer({canvas});
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -371,7 +368,6 @@ function main() {
             instancedlod.render();
             csm.update();
         }
-        stats.update();
         renderer.render(scene, camera);
     }
 
