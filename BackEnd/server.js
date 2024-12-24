@@ -246,6 +246,39 @@ app.post('/getUserId', (req, res) => {
   });
 });
 
+// 路由：获取用户种植信息
+app.get('/user-trees/:userId/:treeId', (req, res) => {
+  const { userId, treeId } = req.params;
+  const query = 'SELECT growth_stage FROM user_trees WHERE user_id = ? AND tree_id = ?';
+  db.query(query, [userId, treeId], (err, results) => {
+    if (err) {
+      console.error('获取用户种植信息失败:', err);
+      res.status(500).json({ error: '无法获��种植信息' });
+      return;
+    }
+    if (results.length > 0) {
+      res.json({ success: true, growthStage: results[0].growth_stage });
+    } else {
+      res.status(404).json({ success: false, error: '未找到种植信息' });
+    }
+  });
+});
+
+// 路由：更新用户种植信息的生长阶段
+app.put('/user-trees/:userId/:treeId', (req, res) => {
+  const { userId, treeId } = req.params;
+  const { growthStage } = req.body;
+  const query = 'UPDATE user_trees SET growth_stage = ? WHERE user_id = ? AND tree_id = ?';
+  db.query(query, [growthStage, userId, treeId], (err, results) => {
+    if (err) {
+      console.error('更新生长阶段失败:', err);
+      res.status(500).json({ error: '无法更新生长阶段' });
+      return;
+    }
+    res.json({ success: true, message: '生长阶段更新成功' });
+  });
+});
+
 // 启动服务器
 app.listen(port, () => {
   console.log(`服务器加载成功`);
