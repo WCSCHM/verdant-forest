@@ -89,14 +89,4 @@ export class Tree {
         });
         this.treeObject = null; // 重置当前树对象
     }
-
-    // /**
-    //  * 实现树长大的效果（通过逐渐改变缩放比例）
-    //  */
-    // growTree(deltaScale) {
-    //     if (this.treeObject) {
-    //         const scale = this.treeObject.scale.x + deltaScale;
-    //         this.treeObject.scale.set(scale, scale, scale);
-    //     }
-    // }
 }
