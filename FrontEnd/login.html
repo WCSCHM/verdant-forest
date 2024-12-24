@@ -99,7 +99,7 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            fetch('http://localhost:3008/login', {
+            fetch('http://localhost:3008/getUserId', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
@@ -107,6 +107,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    localStorage.setItem('userId', data.userId);
                     window.location.href = 'User.html';
                 } else {
                     document.getElementById('message').textContent = data.error;

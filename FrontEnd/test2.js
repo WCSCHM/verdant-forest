@@ -9,8 +9,8 @@ import {Tree} from './tree.js';
 import {WateringEffect} from './watering'
 import { setupCoinsUI } from './coins.js';
 
-// 当前用户 ID 和后端 API 地址
-const userId = 1;
+// 从 localStorage 获取用户 ID
+const userId = localStorage.getItem('userId');
 const apiUrl = 'http://localhost:3008';
 
 // 创建场景、相机和渲染器
@@ -348,7 +348,7 @@ quizButton.addEventListener('click', () => {
 function animate() {
     requestAnimationFrame(animate);
 
-    // 更新 time 值用于风的效果
+    // ��新 time 值用于风的效果
     timeUniform.value += 0.01;
 
     // 控制所有树随风摇摆
