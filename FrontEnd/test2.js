@@ -415,6 +415,7 @@ function submitAnswer(questionId, selectedOption) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, questionId, selectedOption })
     })
+
     .then(response => response.json())
     .then(data => {
         alert(data.message);
