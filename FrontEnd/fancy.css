@@ -1,0 +1,325 @@
+/* 引入 Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Exo+2:wght@600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* 防止滚动，保证动画完整显示 */
+    font-family: 'Exo 2', sans-serif;
+    background: #2e8b57; /* 基础深绿色 */
+    position: relative;
+}
+
+/* ==== 背景花纹层 ==== */
+#backgroundPattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        /* 原有橙黄色系炫酷花纹 */
+            repeating-radial-gradient(circle at 25% 25%, rgba(255, 165, 0, 0.1) 0, rgba(255, 165, 0, 0.1) 20px, transparent 20px, transparent 40px),
+            repeating-radial-gradient(circle at 75% 75%, rgba(255, 215, 0, 0.1) 0, rgba(255, 215, 0, 0.1) 30px, transparent 30px, transparent 60px),
+            repeating-linear-gradient(60deg, rgba(255, 165, 0, 0.05) 0, rgba(255, 165, 0, 0.05) 4px, transparent 4px, transparent 8px),
+            repeating-linear-gradient(-60deg, rgba(255, 215, 0, 0.05) 0, rgba(255, 215, 0, 0.05) 4px, transparent 4px, transparent 8px),
+                /* 新增橙黄色火焰状纹路 */
+            radial-gradient(circle at 50% 50%, rgba(255, 140, 0, 0.3) 0%, rgba(255, 69, 0, 0) 60%);
+    background-size: 150px 150px, 200px 200px, 100px 100px, 100px 100px, 100% 100%;
+    opacity: 0.6;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ==== 边沿静态橙黄色纹路 ==== */
+#borderAnimation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 20px; /* 边框宽度 */
+    z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+    border: 15px solid transparent; /* 增加边框宽度 */
+    border-image: linear-gradient(45deg, #ffa500, #ff8c00, #ffd700, #ff8c00, #ffa500) 1; /* 使用边框图片 */
+}
+
+/* ==== 页面容器 ==== */
+#fancyContainer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 1; /* 确保在背景层之上 */
+}
+
+/* ==== 左上角：图案 + 用户名 ==== */
+#userInfo {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    display: flex;
+    align-items: center;
+}
+#patternIcon {
+    width: 60px;
+    height: 60px;
+    margin-right: 15px;
+    animation: bounce 2s infinite ease-in-out;
+}
+#usernameText {
+    font-size: 40px;
+    font-weight: 800;
+    color: #fffacd;  /* 柔和的淡黄色 */
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
+    letter-spacing: 3px;
+    font-family: 'Orbitron', sans-serif;
+}
+
+/* ==== 右上角：金币图案 + 金币数字 ==== */
+#coinInfo {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    display: flex;
+    align-items: center;
+}
+#coinIcon {
+    width: 60px;
+    height: 60px;
+    margin-right: 15px;
+    animation: bounce 2s infinite ease-in-out reverse;
+}
+#coinCount {
+    font-size: 36px;
+    font-weight: 800;
+    color: #fffacd;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+    font-family: 'Orbitron', sans-serif;
+}
+
+/* ==== 中心按钮容器 ==== */
+#centerButtons {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    gap: 80px; /* 按钮间距 */
+    flex-direction: row; /* 横向排列 */
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    flex-wrap: nowrap;
+}
+
+/* ==== 大按钮公共样式（增强） ==== */
+.bigButton {
+    width: 500px;
+    height: 250px;
+    background: linear-gradient(145deg, #ffa500, #ff8c00);
+    border: 8px solid #d4ac0d;
+    border-radius: 40px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 0 40px rgba(255,255,255,0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    font-size: 64px;
+    font-weight: 800;
+    color: #fff8dc;
+    text-shadow: 3px 3px 8px rgba(0,0,0,0.7);
+    font-family: 'Orbitron', sans-serif;
+    position: relative;
+    overflow: hidden;
+    /* 添加浅黄色纹路图案 */
+    background-image:
+            radial-gradient(circle at 25% 25%, rgba(255, 255, 224, 0.3) 0%, rgba(255, 255, 224, 0) 70%),
+            radial-gradient(circle at 75% 75%, rgba(255, 255, 224, 0.3) 0%, rgba(255, 255, 224, 0) 70%);
+    background-blend-mode: overlay;
+}
+.bigButton:hover {
+    transform: translateY(-20px) scale(1.15);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.7), inset 0 0 40px rgba(255,255,255,0.4);
+}
+
+/* ==== 为按钮添加一个涟漪背景动画 ==== */
+.bigButton::before {
+    content: '';
+    position: absolute;
+    width: 300%;
+    height: 300%;
+    background: radial-gradient(circle, rgba(255,255,255,0.2), transparent 40%);
+    top: -100%;
+    left: -100%;
+    animation: ripple 6s infinite;
+    opacity: 0.3;
+}
+@keyframes ripple {
+    0%   { transform: scale(0);       opacity: 0.8; }
+    50%  { transform: scale(1.5);     opacity: 0.2; }
+    100% { transform: scale(3.0);     opacity: 0;   }
+}
+
+/* ==== 按钮文字 ==== */
+.btnText {
+    z-index: 1;
+    position: relative;
+    mix-blend-mode: normal;
+}
+
+/* ==== 弹跳动画 ==== */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-20px); }
+}
+
+/* ==== 静态火焰闪烁动画 ==== */
+@keyframes flameFlicker {
+    from { transform: scale(1) rotate(0deg); opacity: 0.3; }
+    to   { transform: scale(1.05) rotate(3deg); opacity: 0.5; }
+}
+
+
+/* ============== 传送带选择框的样式 ============== */
+#conveyorSelector {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+.arrow {
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 224, 0.3);
+    transition: background-color 0.3s;
+}
+.arrow:hover {
+    background-color: rgba(255, 255, 224, 0.6);
+}
+.arrow svg {
+    width: 24px;
+    height: 24px;
+    fill: #fffacd;
+}
+.conveyor-option {
+    padding: 10px 20px;
+    border: 2px solid #fffacd;
+    color: #fffacd;
+    font-weight: bold;
+    border-radius: 10px;
+    transition: background-color 0.3s, transform 0.3s;
+    font-family: 'Orbitron', sans-serif;
+}
+.conveyor-option.selected {
+    background-color: #ffa500;
+    transform: scale(1.15);
+}
+
+/* ============== 轮播图（Slideshow） ============== */
+#slideshowContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 450px;
+    perspective: 1200px; /* 3D 视角 */
+    z-index: 5; /* 保证在页面中较靠前 */
+    overflow: hidden;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,255,255,0.1);
+}
+.slide {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    border-radius: 20px;
+    opacity: 0;
+    transform: rotateY(90deg) scale(0.8);
+    transition:
+            opacity 1s ease,
+            transform 1s ease;
+}
+.slide.active {
+    opacity: 1;
+    transform: rotateY(0deg) scale(1);
+}
+/* 为了视觉效果，上一张图离开时做一个 3D 翻转 */
+.slide.prevActive {
+    opacity: 0;
+    transform: rotateY(-90deg) scale(0.8);
+}
+
+/* 轮播图按钮 */
+.slideshow-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    background-color: rgba(255, 255, 224, 0.3);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    z-index: 10;
+}
+.slideshow-btn:hover {
+    background-color: rgba(255, 255, 224, 0.6);
+}
+.slideshow-btn svg {
+    width: 30px;
+    height: 30px;
+    fill: #fffacd;
+}
+#prevSlide {
+    left: 20px;
+}
+#nextSlide {
+    right: 20px;
+}
+
+/* 指示点容器 */
+#dotsContainer {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+}
+.dot {
+    width: 15px;
+    height: 15px;
+    background-color: rgba(255, 255, 224, 0.4);
+    border: 2px solid #fffacd;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.3s, background-color 0.3s;
+}
+.dot.active {
+    transform: scale(1.3);
+    background-color: #ffa500;
+}

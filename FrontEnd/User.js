@@ -294,7 +294,7 @@
     const plantTreeButton = document.createElement('div');
     plantTreeButton.classList.add('bigButton');
     plantTreeButton.onclick = function () {
-        window.location.href = "Scene.html";
+        window.location.href = "Plant.html";
     };
     const btnText2 = document.createElement('span');
     btnText2.classList.add('btnText');
