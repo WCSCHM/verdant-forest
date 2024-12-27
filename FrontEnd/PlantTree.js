@@ -10,7 +10,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
     const userId = localStorage.getItem('userId');
     const apiUrl = 'http://localhost:3008';
     const username = `用户${userId}`;
-    let userCoins = '加载中...'; // 初始值设置为“加载中...”
+    let userCoins = '加载中...'; // 初始值设置为"加载中..."
 
     // ======= 一次显示几张 =======
     const itemsToShow = 3;
@@ -451,11 +451,11 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
             // 根据当前 userCoins，决定弹窗内容
             if (userCoins >= 50) {
-                // 如果 >= 50 => 弹出“您确定要种植吗？” [确定 | 取消]
+                // 如果 >= 50 => 弹出"您确定要种植吗？" [确定 | 取消]
                 console.log("准备种植", treeConfig.title, "（ID:", treeId, "）");
                 showPopup(`您确定要种植 ${treeConfig.title} 吗？`, true, treeId);
             } else {
-                // 如果 < 50 => 弹出“种植失败” [取消]
+                // 如果 < 50 => 弹出"种植失败" [取消]
                 console.log("金币不足，无法种植", treeConfig.title);
                 showPopup('种植失败', false);
             }
@@ -597,7 +597,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
         // 2) 创建弹窗容器 (overlay)
         const popupOverlay = document.createElement('div');
         popupOverlay.id = 'popupOverlay';
-        // 这里的 `isConfirm` 决定是否显示“确定”按钮
+        // 这里的 `isConfirm` 决定是否显示"确定"按钮
         popupOverlay.innerHTML = `
     <div id="popupContent">
       <div id="popupMessage"></div>
@@ -634,13 +634,13 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
             const requestData = {
                 user_id: userId, // 替换为实际的用户 ID
                 tree_id: treeId, // 替换为实际的树 ID
-                is_planted: 1, // 替换为实际的种植状态
-                growth_stage: 1 // 替换为实际的生长阶段
+                is_planted: 1, // 设置为已种植
+                growth_stage: 1 // 设置为初始生长阶段
             };
 
             try {
                 // 调用后端接口
-                const response = await fetch('${apiUrl}/user-trees', {
+                const response = await fetch(`${apiUrl}/user-trees`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -649,13 +649,18 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
                 });
 
                 if (!response.ok) {
-                    throw new Error(`请求失败: ${response.statusText}`);
+                    const errorData = await response.json();
+                    if (errorData.error === '该树已种植') {
+                        alert('该树已种植');
+                    } else {
+                        throw new Error(`请求失败: ${response.statusText}`);
+                    }
+                } else {
+                    // 解析后端返回的 JSON 数据
+                    const result = await response.json();
+                    console.log('种植信息添加成功:', result);
+                    alert('种植信息添加成功！');
                 }
-
-                // 解析后端返回的 JSON 数据
-                const result = await response.json();
-                console.log('种植信息添加成功:', result);
-                alert('种植信息添加成功！');
             } catch (error) {
                 console.error('种植信息添加失败:', error);
                 alert('种植信息添加失败，请重试！');
@@ -693,7 +698,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
       transform: translateX(-50%);
       box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
       background: linear-gradient(45deg, #ff8c00, #ff4500);
-      color: #ffe4b5; /* 更亮的字体颜色 */
+      color: #ffe4b5; /* 更亮的字���颜色 */
     }
   </style>
 `);

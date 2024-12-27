@@ -94,17 +94,33 @@ app.get('/user-trees/:userId', (req, res) => {
 // 路由：添加用户种植树信息
 app.post('/user-trees', (req, res) => {
   const { user_id, tree_id, is_planted, growth_stage } = req.body;
-  const query = `
-    INSERT INTO user_trees (user_id, tree_id, is_planted, growth_stage)
-    VALUES (?, ?, ?, ?)
-  `;
-  db.query(query, [user_id, tree_id, is_planted || false, growth_stage || 0], (err, result) => {
+
+  // 检查用户是否已经种植了该树
+  const checkQuery = 'SELECT * FROM user_trees WHERE user_id = ? AND tree_id = ?';
+  db.query(checkQuery, [user_id, tree_id], (err, results) => {
     if (err) {
-      console.error('添加用户种植树信息失败:', err);
-      res.status(500).json({ error: '无法添加种植信息' });
+      console.error('检查用户种植树信息失败:', err);
+      res.status(500).json({ error: '无法检查种植信息' });
       return;
     }
-    res.json({ message: '种植信息添加成功', id: result.insertId });
+    if (results.length > 0) {
+      // 用户已经种植了该树
+      res.status(400).json({ error: '该树已种植' });
+    } else {
+      // 插入新的种植信息
+      const insertQuery = `
+        INSERT INTO user_trees (user_id, tree_id, is_planted, growth_stage)
+        VALUES (?, ?, ?, ?)
+      `;
+      db.query(insertQuery, [user_id, tree_id, is_planted, growth_stage], (err, result) => {
+        if (err) {
+          console.error('添加用户种植树信息失败:', err);
+          res.status(500).json({ error: '无法添加种植信息' });
+          return;
+        }
+        res.json({ message: '种植信息添加成功', id: result.insertId });
+      });
+    }
   });
 });
 
@@ -220,7 +236,7 @@ app.post('/answer', (req, res) => {
           res.status(500).json({ error: '无法更新金币' });
           return;
         }
-        res.json({ success: true, message: '答对了！金币增加10个。' });
+        res.json({ success: true, message: '��对了！金币增加10个' });
       });
     } else {
       res.json({ success: false, message: '答错了，请再试一次。' });
