@@ -10,6 +10,7 @@ import { WateringEffect } from '../watering';
 // 从 localStorage 获取用户 ID
 const userId = localStorage.getItem('userId');
 const apiUrl = 'http://localhost:3008';
+const chooseTree = 3; // 假设选择的树种 ID 为 3
 
 // ------------------------------
 // 创建场景、相机和渲染器
@@ -53,22 +54,24 @@ let treeStage1 = null; // 第一阶段模型
 let treeStage2 = null; // 第二阶段模型
 let treeStage3 = null; // 第三阶段模型
 
-// 当前场景中正在显示的树（便于做摇摆效果、切换等）
+// 当场景中正在显示的树（便于做摇摆效果、切换等）
 let currentTree = null;
 
 // 标识种植阶段：1->2->3
 let treeStage = 1;
+
+// 计数器，用于跟踪加载的模型数量
+let modelsLoaded = 0;
 
 // 分别加载3个 glb
 loader.load(
     './Resource/tree3-1.glb',
     (gltf) => {
         treeStage1 = gltf.scene;
-        // 根据需要做缩放
         treeStage1.scale.set(0.04, 0.04, 0.04);
-        // 初始时添加到场景中
-        scene.add(treeStage1);
-        currentTree = treeStage1;
+        console.log('Tree stage 1 loaded');
+        modelsLoaded++;
+        checkAllModelsLoaded();
     },
     undefined,
     (err) => console.error('Error loading tree1-1:', err)
@@ -79,7 +82,9 @@ loader.load(
     (gltf) => {
         treeStage2 = gltf.scene;
         treeStage2.scale.set(70, 70, 70);
-        // 默认不加到场景里，等第一次浇水到达阈值再切换
+        console.log('Tree stage 2 loaded');
+        modelsLoaded++;
+        checkAllModelsLoaded();
     },
     undefined,
     (err) => console.error('Error loading tree1-2:', err)
@@ -90,11 +95,72 @@ loader.load(
     (gltf) => {
         treeStage3 = gltf.scene;
         treeStage3.scale.set(4, 4, 4);
-        // 同理，等第二次浇水到达阈值再切换
+        console.log('Tree stage 3 loaded');
+        modelsLoaded++;
+        checkAllModelsLoaded();
     },
     undefined,
     (err) => console.error('Error loading tree1-3:', err)
 );
+
+// 检查所有模型是否加载完成
+function checkAllModelsLoaded() {
+    if (modelsLoaded === 3) {
+        loadUserTree();
+    }
+}
+
+// 获取用户种植信息并加载对应的树模型
+async function loadUserTree() {
+    try {
+        const response = await fetch(`${apiUrl}/user-trees/${userId}/${chooseTree}`);
+        if (!response.ok) {
+            throw new Error(`Error fetching user tree: ${response.statusText}`);
+        }
+        const data = await response.json();
+        if (data.success) {
+            treeStage = data.growthStage;
+            console.log(`Growth stage for tree ${chooseTree}: ${treeStage}`);
+            
+            // 根据 growthStage 显示对应���树模型
+            switch (treeStage) {
+                case 1:
+                    if (treeStage1) {
+                        scene.add(treeStage1);
+                        currentTree = treeStage1;
+                    } else {
+                        console.error('Tree stage 1 not loaded');
+                    }
+                    break;
+                case 2:
+                    if (treeStage2) {
+                        scene.add(treeStage2);
+                        currentTree = treeStage2;
+                    } else {
+                        console.error('Tree stage 2 not loaded');
+                    }
+                    break;
+                case 3:
+                    if (treeStage3) {
+                        scene.add(treeStage3);
+                        currentTree = treeStage3;
+                    } else {
+                        console.error('Tree stage 3 not loaded');
+                    }
+                    break;
+                default:
+                    console.error(`Invalid growth stage: ${treeStage}`);
+            }
+        } else {
+            console.error('未找到种植信息');
+        }
+    } catch (error) {
+        console.error('Error loading user tree:', error);
+    }
+}
+
+// 在页面加载时调用
+loadUserTree();
 
 // ------------------------------
 // 地形与天空初始化
@@ -133,7 +199,7 @@ waterButton.style.cursor = 'pointer';
 document.body.appendChild(waterButton);
 
 // ------------------------------
-// 自定义金币图案 + 金币数量显示
+// 自定义金币图案 + 金币数显示
 // ------------------------------
 let coinCount = 0; // 初始化为0，后续通过API获取
 const coinContainer = document.createElement('div');
@@ -220,6 +286,26 @@ fetchCoinCount();
 // ------------------------------
 let waterTimes = 0;
 
+// 更新数据库中的生长阶段
+async function updateGrowthStage(newStage) {
+    try {
+        const response = await fetch(`${apiUrl}/user-trees/${userId}/${chooseTree}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ growthStage: newStage })
+        });
+        if (!response.ok) {
+            throw new Error(`Error updating growth stage: ${response.statusText}`);
+        }
+        const data = await response.json();
+        console.log(data.message);
+    } catch (error) {
+        console.error('Error updating growth stage:', error);
+    }
+}
+
 waterButton.addEventListener('click', async () => {
     // 1. 若金币数量<=0，则不再起效果
     if (coinCount <= 0) {
@@ -255,6 +341,7 @@ waterButton.addEventListener('click', async () => {
             currentTree = treeStage2;
         }
         treeStage = 2;
+        await updateGrowthStage(treeStage); // 更新数据库中的生长阶段
     }
 
     // 当浇水次数为 10 时，切换到第三阶段并显示“种植成功”
@@ -268,6 +355,7 @@ waterButton.addEventListener('click', async () => {
             currentTree = treeStage3;
         }
         treeStage = 3;
+        await updateGrowthStage(treeStage); // 更新数据库中的生长阶段
 
         // 显示“种植成功”
         const successMessage = document.createElement('div');
@@ -289,7 +377,7 @@ waterButton.addEventListener('click', async () => {
 });
 
 // ------------------------------
-// 一个简易的“摇摆”示例函数
+// 一个简易的“摇摆”示函数
 //   仅作演示，实际可用更复杂的骨骼动画或顶点动画
 // ------------------------------
 function swayTree(object, time) {
@@ -340,7 +428,7 @@ window.addEventListener('resize', () => {
 });
 
 // ------------------------------
-// 让金币显示与浇水按钮的显示状态联动
+// 让币显示与浇水按钮的显示状态联动
 // ------------------------------
 const observer = new MutationObserver(() => {
     if (waterButton.style.display !== 'none') {
