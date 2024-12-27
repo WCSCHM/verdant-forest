@@ -43,9 +43,9 @@ app.get('/users', (req, res) => {
 
 // 路由：添加新用户
 app.post('/users', (req, res) => {
-  const { username, password, coins } = req.body;
-  const query = 'INSERT INTO users (username, password, coins) VALUES (?, ?, ?)';
-  db.query(query, [username, password, coins || 0], (err, result) => {
+  const { username, password } = req.body;
+  const query = 'INSERT INTO users (username, password, coins) VALUES (?, ?, 0)';
+  db.query(query, [username, password], (err, result) => {
     if (err) {
       console.error('添加用户失败:', err);
       res.status(500).json({ error: '无法添加用户' });
@@ -253,7 +253,7 @@ app.get('/user-trees/:userId/:treeId', (req, res) => {
   db.query(query, [userId, treeId], (err, results) => {
     if (err) {
       console.error('获取用户种植信息失败:', err);
-      res.status(500).json({ error: '无法获��种植信息' });
+      res.status(500).json({ error: '无法获取种植信息' });
       return;
     }
     if (results.length > 0) {
