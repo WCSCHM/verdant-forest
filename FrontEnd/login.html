@@ -40,7 +40,7 @@
             display: block;
             margin: 10px auto;
             padding: 10px;
-            width: 100%;
+            width: 95%;
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 1rem;
@@ -64,7 +64,7 @@
         }
 
         /* 消息提示样式 */
-        .login-container p#message {
+        .login-container p#message, .login-container p#regMessage {
             margin-top: 15px;
             color: red;
             font-size: 0.9rem;
@@ -92,8 +92,22 @@
         <input type="text" id="username" placeholder="Username" required>
         <input type="password" id="password" placeholder="Password" required>
         <button onclick="login()">Login</button>
+        <br></br>
+        <button onclick="showRegister()">Register</button>
         <p id="message"></p>
     </div>
+
+    <div class="login-container" id="registerContainer" style="display: none;">
+        <h1>Register</h1>
+        <input type="text" id="regUsername" placeholder="Username" required>
+        <input type="password" id="regPassword" placeholder="Password" required>
+        <input type="text" id="regPhone" placeholder="Phone Number" required>
+        <button onclick="register()">Register</button>
+        <br></br>
+        <button onclick="hideRegister()">Back to Login</button>
+        <p id="regMessage"></p>
+    </div>
+
     <script>
         function login() {
             const username = document.getElementById('username').value;
@@ -114,6 +128,48 @@
                 }
             })
             .catch(error => console.error('Error:', error));
+        }
+
+        function showRegister() {
+            document.querySelector('.login-container').style.display = 'none';
+            document.getElementById('registerContainer').style.display = 'block';
+        }
+
+        function hideRegister() {
+            document.querySelector('.login-container').style.display = 'block';
+            document.getElementById('registerContainer').style.display = 'none';
+        }
+
+        function register() {
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+            const phone = document.getElementById('regPhone').value;
+
+            if (!validatePhone(phone)) {
+                document.getElementById('regMessage').textContent = '请输入有效的手机号';
+                return;
+            }
+
+            fetch('http://localhost:3008/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert('注册成功，请登录');
+                    hideRegister();
+                } else {
+                    document.getElementById('regMessage').textContent = data.error;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function validatePhone(phone) {
+            const phoneRegex = /^[1-9]\d{10}$/; // 11位数字且不以0开头
+            return phoneRegex.test(phone);
         }
     </script>
 </body>
