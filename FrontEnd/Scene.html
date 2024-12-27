@@ -4,10 +4,24 @@
     <meta charset="UTF-8">
     <title>Verdant Forest</title>
     <style>
-        body{margin:0;}
+        body { margin: 0; }
     </style>
 </head>
 <body>
-<script type="module" src="Scene/Scene1.js"></script>
+<script>
+    // 获取 URL 中的 index 参数
+    const urlParams = new URLSearchParams(window.location.search);
+    const index = parseInt(urlParams.get('index'), 10);
+
+    // 根据 index 加载对应的 Scene.js 文件
+    if (!isNaN(index)) {
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.src = `Scene/Scene${index + 1}.js`;
+        document.body.appendChild(script);
+    } else {
+        console.error('Invalid index parameter');
+    }
+</script>
 </body>
 </html>

@@ -251,7 +251,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
     document.head.appendChild(styleEl);
 
     /********************************************************
-     *  三、主要DOM结构（背景、边框、页面容器等）
+     *  三、主要DOM结构（背景、边框、��面容器等）
      ********************************************************/
         // 背景花纹
     const backgroundPattern = document.createElement('div');
@@ -345,7 +345,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
         camera.position.set(0, 1.5, 4);
 
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        // 先把它加到 DOM，稍后在渲染循环中会动态调整大小
+        // 先把它加到 DOM，���后在渲染循环中会动态调整大小
         item.appendChild(renderer.domElement);
 
         // 添加光源
@@ -369,8 +369,9 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
         // 点击事件（示例）
         item.addEventListener('click', () => {
-            console.log(`你点击了模型：${modelConfig.title}`);
-            // TODO: 执行跳转场景或弹窗等操作
+            console.log(`你点击了模型：${modelConfig.title}${index}`);
+            // 跳转到 Scene.html 并传递 index
+            window.location.href = `Scene.html?index=${index}`;
         });
 
         // 记录

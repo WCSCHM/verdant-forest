@@ -714,7 +714,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 // 4) 点击按钮的跳转逻辑（根据需求自行修改）
     bottomBtn.addEventListener('click', () => {
         // 示例：跳转到 "/myplants" 页面
-        window.location.href = '/myplants';
+        window.location.href = '/View.html';
     });
 
 
