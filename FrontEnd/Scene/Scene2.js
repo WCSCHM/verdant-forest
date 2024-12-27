@@ -165,8 +165,8 @@ loadUserTree();
 // ------------------------------
 // 地形与天空初始化
 // ------------------------------
-const ground = new Desert(camera, scene);
-const mySky = new Sunset(scene, camera);
+const ground = new Hill(camera, scene);
+const mySky = new Sunny(scene, camera);
 
 // ------------------------------
 // 初始化鸟类对象
