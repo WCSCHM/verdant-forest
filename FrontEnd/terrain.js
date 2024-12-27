@@ -1,18 +1,87 @@
 import * as THREE from 'three';
 import { createNoise2D } from 'simplex-noise';
 import seedrandom from 'seedrandom';
-import {Water} from "three/addons";
+import { Water } from 'three/addons';
+import { LeafGeometry } from "./leaf_flower_fruit/LeafGeometry";
+import { FlowerGeometry } from "./leaf_flower_fruit/FlowerGeometry";
 
+/**
+ * 在给定顶点坐标（世界坐标）上，随机散布“草 + 花”组合，让花朵处于草丛中间。
+ * @param {THREE.Scene} scene       - Three.js 场景
+ * @param {THREE.TextureLoader} loader - 纹理加载器
+ * @param {number[]} vertices       - 世界坐标数组 [x0,y0,z0, x1,y1,z1, ...]
+ * @param {number|null} waterLevel  - 若需要排除水面以下区域，可传水面高度；无则传 null
+ */
+function scatterGrassAndFlowers(scene, loader, vertices, waterLevel = null) {
+    const grassTexture = loader.load("/resources/images/grass.png");
+    const flowerTexture = loader.load("/resources/images/dingxiang/flower_base.png");
 
-class terrain{
+    const grassGeo = new LeafGeometry("cross", 3, 3).generate();
+    const flowerGeo = new FlowerGeometry()
+        .generate()
+        .scale(0.3, 0.3, 0.3)
+        .translate(0, 1.5, 0); // 花稍微抬高，让其从草丛中显露
+
+    const grassMat = new THREE.MeshBasicMaterial({
+        map: grassTexture,
+        side: THREE.DoubleSide,
+        color: 0x646464,
+        alphaTest: 0.1,
+    });
+    const flowerMat = new THREE.MeshBasicMaterial({
+        map: flowerTexture,
+        side: THREE.DoubleSide,
+        color: 0x646464,
+        alphaTest: 0.1,
+    });
+
+    const grassMesh = new THREE.Mesh(grassGeo, grassMat);
+    const flowerMesh = new THREE.Mesh(flowerGeo, flowerMat);
+    const grassFlowerGroupPrototype = new THREE.Group();
+    grassFlowerGroupPrototype.add(grassMesh);
+    grassFlowerGroupPrototype.add(flowerMesh);
+    const total = 500; // 可根据需求调整数量
+    const position = new THREE.Vector3();
+    const quaternion = new THREE.Quaternion();
+    const yAxis = new THREE.Vector3(0, 1, 0);
+    const scaleVec = new THREE.Vector3();
+
+    for (let i = 0; i < total; i++) {
+        const randIndex = 3 * Math.floor(Math.random() * (vertices.length / 3));
+        const x = vertices[randIndex];
+        const y = vertices[randIndex + 1];
+        const z = vertices[randIndex + 2];
+
+        // 若指定 waterLevel，则过滤掉水面以下区域
+        if (waterLevel !== null && y <= waterLevel) {
+            continue;
+        }
+
+        const size = Math.random() * 2 + 2;
+        scaleVec.set(size, size, size);
+
+        quaternion.setFromAxisAngle(yAxis, Math.random() * Math.PI * 2);
+        position.set(x, y, z);
+
+        // 克隆“草+花”组合
+        const newGroup = grassFlowerGroupPrototype.clone();
+        newGroup.position.copy(position);
+        newGroup.quaternion.copy(quaternion);
+        newGroup.scale.copy(scaleVec);
+
+        scene.add(newGroup);
+    }
+}
+
+class terrain {
     constructor(camera, scene) {
         this.textureLoader = new THREE.TextureLoader();
         this.camera = camera;
         this.scene = scene;
 
-        this.groundTexture=this.GroundTexture();
+        this.groundTexture = this.GroundTexture();
 
-        this.planeSize = 1000;  // 单个平面的大小
+        this.planeSize = 1000; // 单块平面大小
         this.planes = [];
         this.planePositions = [
             [-this.planeSize, 0, -this.planeSize],
@@ -27,13 +96,10 @@ class terrain{
         ];
 
         this.noise2D = createNoise2D();
-
-
     }
 
-    GroundTexture(){
-
-    }
+    // 由子类覆盖
+    GroundTexture() {}
 
     updateTerrain() {
         const cameraPosition = new THREE.Vector3();
@@ -53,58 +119,72 @@ class terrain{
     }
 }
 
-export class Desert extends terrain{
+export class Desert extends terrain {
     constructor(camera, scene) {
-        super(camera,scene);
+        super(camera, scene);
         this.createTerrain();
     }
 
-    GroundTexture(){
-        const groundTexture = this.textureLoader.load('./Resource/ground.jpg');  // 替换为您的纹理路径
+    GroundTexture() {
+        const groundTexture = this.textureLoader.load('./Resource/ground.jpg'); // 沙地纹理
         groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
-        groundTexture.repeat.set(1000, 1000);  // 大量重复纹理，模拟延伸
+        groundTexture.repeat.set(1000, 1000);
         return groundTexture;
     }
 
     generateHeight(x, z) {
-        const distanceFromCenter = Math.sqrt(x * x + z * z) / this.planeSize; // 距离中心的相对距离
-        const flatRadius = 0.01; // 平原半径 (缩小至0.2, 让山丘更靠近中心)
+        const distanceFromCenter = Math.sqrt(x * x + z * z) / this.planeSize;
+        const flatRadius = 0.01; // 中心更平坦
 
         if (distanceFromCenter < flatRadius) {
-            return 0; // 中心区域为平原
+            return 0;
         }
 
-        const noiseScale = 0.004; // 降低噪声频率，增大山丘之间的间距
-        const mountainHeight = 30; // 减小山丘的最大高度
-
-        // 使用噪声生成高度，随着距离增加高度增大
+        const noiseScale = 0.004;
+        const mountainHeight = 30;
         const noiseValue = this.noise2D(x * noiseScale, z * noiseScale);
+
         return noiseValue * mountainHeight * (distanceFromCenter - flatRadius);
     }
 
-    createTerrain(){
-        // 创建多个平面并修改其顶点高度
-        this.planePositions.forEach(([x, y, z]) => {
-            const geometry = new THREE.PlaneGeometry(this.planeSize, this.planeSize, 100, 100); // 使用较多细分以实现平滑地形
+    createTerrain() {
+        const tempVec3 = new THREE.Vector3();
+
+        this.planePositions.forEach(([px, py, pz]) => {
+            // 创建 PlaneGeometry 并生成高度
+            const geometry = new THREE.PlaneGeometry(this.planeSize, this.planeSize, 100, 100);
             geometry.rotateX(-Math.PI / 2);
 
-            // 调整每个顶点的高度
-            geometry.attributes.position.array.forEach((_, idx) => {
-                if (idx % 3 === 0) { // 仅处理 X、Z 坐标的每个顶点
-                    const vx = geometry.attributes.position.getX(idx / 3); // 获取 X 坐标
-                    const vz = geometry.attributes.position.getZ(idx / 3); // 获取 Z 坐标
-                    const height = this.generateHeight(vx + x, vz + z); // 基于噪声生成高度
-                    geometry.attributes.position.setY(idx / 3, height); // 设置 Y 高度
-                }
-            });
+            for (let i = 0; i < geometry.attributes.position.count; i++) {
+                const vx = geometry.attributes.position.getX(i);
+                const vz = geometry.attributes.position.getZ(i);
+                const height = this.generateHeight(vx + px, vz + pz);
+                geometry.attributes.position.setY(i, height);
+            }
 
-            geometry.computeVertexNormals(); // 重新计算法向量，以使光照效果正确
+            geometry.computeVertexNormals();
 
+            // 创建网格
             const material = new THREE.MeshStandardMaterial({ map: this.groundTexture });
             const plane = new THREE.Mesh(geometry, material);
-            plane.position.set(x, y, z);
+            plane.position.set(px, py, pz);
             this.scene.add(plane);
             this.planes.push(plane);
+
+            // 将几何顶点局部坐标转为世界坐标
+            const verticesGlobal = [];
+            for (let i = 0; i < geometry.attributes.position.count; i++) {
+                tempVec3.set(
+                    geometry.attributes.position.getX(i),
+                    geometry.attributes.position.getY(i),
+                    geometry.attributes.position.getZ(i)
+                );
+                plane.localToWorld(tempVec3);
+                verticesGlobal.push(tempVec3.x, tempVec3.y, tempVec3.z);
+            }
+
+            // 沙漠不考虑水面 => waterLevel = null
+            scatterGrassAndFlowers(this.scene, this.textureLoader, verticesGlobal, null);
         });
     }
 }
@@ -113,55 +193,68 @@ export class Hill extends terrain {
     constructor(camera, scene) {
         super(camera, scene);
 
-        // 使用固定种子创建确定性的噪声生成器
-        const rng = seedrandom('fixed-seed'); // 固定种子，可以替换成任意字符串
-        this.noise2D = createNoise2D(rng); // 使用固定的随机生成器初始化噪声
+        const rng = seedrandom('fixed-seed');
+        this.noise2D = createNoise2D(rng); // 固定种子 => 地形可复现
 
         this.createTerrain();
     }
 
-    GroundTexture(){
-        const groundTexture = this.textureLoader.load('./Resource/island.png');  // 替换为您的纹理路径
+    GroundTexture() {
+        const groundTexture = this.textureLoader.load('./Resource/island.png'); // 山地纹理
         groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
-        groundTexture.repeat.set(100,100);  // 大量重复纹理，模拟延伸
+        groundTexture.repeat.set(100, 100);
         return groundTexture;
     }
 
     generateHeight(x, z) {
-        const noiseScale = 0.005; // 噪声缩放比例
-        const maxHeight = 160;    // 中心的最大高度值
-        const distanceFromCenter = Math.sqrt(x * x + z * z) / this.planeSize; // 距离中心的相对距离
+        const noiseScale = 0.005;
+        const maxHeight = 160;
+        const distanceFromCenter = Math.sqrt(x * x + z * z) / this.planeSize;
 
-        // 中心高度较高，远离中心逐渐降低并趋向平坦
-        const centerHeight = maxHeight * Math.exp(-distanceFromCenter*2); // 使用指数函数控制高度衰减
-
-        // 使用噪声生成地形细节，并且随着距离增加降低噪声影响
+        // 中心较高，离中心越远越低
+        const centerHeight = maxHeight * Math.exp(-distanceFromCenter * 2);
         const noise = this.noise2D(x * noiseScale, z * noiseScale) * 15 * (1 - distanceFromCenter);
 
         return centerHeight + noise;
     }
 
     createTerrain() {
-        // 创建多个平面并修改其顶点高度
-        this.planePositions.forEach(([x, y, z]) => {
-            const geometry = new THREE.PlaneGeometry(this.planeSize, this.planeSize, 100, 100); // 使用较多细分以实现平滑地形
+        const tempVec3 = new THREE.Vector3();
+
+        this.planePositions.forEach(([px, py, pz]) => {
+            const geometry = new THREE.PlaneGeometry(this.planeSize, this.planeSize, 100, 100);
             geometry.rotateX(-Math.PI / 2);
 
-            // 调整每个顶点的高度
             for (let i = 0; i < geometry.attributes.position.count; i++) {
-                const vx = geometry.attributes.position.getX(i); // 获取 X 坐标
-                const vz = geometry.attributes.position.getZ(i); // 获取 Z 坐标
-                const height = this.generateHeight(vx + x, vz + z); // 基于噪声生成高度
-                geometry.attributes.position.setY(i, height); // 设置 Y 高度
+                const vx = geometry.attributes.position.getX(i);
+                const vz = geometry.attributes.position.getZ(i);
+                const height = this.generateHeight(vx + px, vz + pz);
+                geometry.attributes.position.setY(i, height);
             }
 
-            geometry.computeVertexNormals(); // 重新计算法向量，以使光照效果正确
+            geometry.computeVertexNormals();
 
             const material = new THREE.MeshStandardMaterial({ map: this.groundTexture });
             const plane = new THREE.Mesh(geometry, material);
-            plane.position.set(x - 20, y - 158, z - 9); // 向下平移 103 单位
+            // 这里按你的需求做一些位置微调
+            plane.position.set(px - 20, py - 158, pz - 9);
             this.scene.add(plane);
             this.planes.push(plane);
+
+            // 局部坐标 => 世界坐标
+            const verticesGlobal = [];
+            for (let i = 0; i < geometry.attributes.position.count; i++) {
+                tempVec3.set(
+                    geometry.attributes.position.getX(i),
+                    geometry.attributes.position.getY(i),
+                    geometry.attributes.position.getZ(i)
+                );
+                plane.localToWorld(tempVec3);
+                verticesGlobal.push(tempVec3.x, tempVec3.y, tempVec3.z);
+            }
+
+            // 山地也没水面 => waterLevel = null
+            scatterGrassAndFlowers(this.scene, this.textureLoader, verticesGlobal, null);
         });
     }
 }
@@ -170,16 +263,15 @@ export class Grassland extends terrain {
     constructor(camera, scene) {
         super(camera, scene);
 
-        // 使用固定种子创建一致的噪声生成器
         const rng = seedrandom('fixed-seed');
         this.noise2D = createNoise2D(rng);
 
         this.createTerrain();
-        this.createWaterSurface(); // 添加水面
+        this.createWaterSurface();
     }
 
     GroundTexture() {
-        const groundTexture = this.textureLoader.load('./Resource/grass.png');  // 替换为您的草地纹理路径
+        const groundTexture = this.textureLoader.load('./Resource/grass.png'); // 草地纹理
         groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
         groundTexture.repeat.set(100, 100);
         return groundTexture;
@@ -187,36 +279,37 @@ export class Grassland extends terrain {
 
     generateHeight(x, z) {
         const noiseScale = 0.005;
-        const maxHeight = 20;       // 高地的最大高度
-        const riverWidth = 20;      // 河流宽度
-        const hillRadius = 30;      // 高地的半径
-        const distanceFromCenter = Math.sqrt(x * x + z * z); // 到中心的距离
+        const maxHeight = 20;
+        const riverWidth = 20;
+        const hillRadius = 30;
+        const distanceFromCenter = Math.sqrt(x * x + z * z);
 
-        // 中心形成高地，周边为河流和草原
         let height;
         if (distanceFromCenter < hillRadius) {
-            // 在高地范围内，噪声高度逐渐增加
+            // 高地
             height = this.noise2D(x * noiseScale, z * noiseScale) * maxHeight * (1 - distanceFromCenter / hillRadius);
         } else if (distanceFromCenter < hillRadius + riverWidth) {
-            // 在高地外围生成河流，降低该区域的高度
+            // 河流区
             const riverDepth = 15;
-            height = -riverDepth * (1 - (distanceFromCenter - hillRadius) / riverWidth); // 靠近高地区域形成河流
+            height = -riverDepth * (1 - (distanceFromCenter - hillRadius) / riverWidth);
         } else {
-            // 更远的区域保持平缓起伏
+            // 远处平缓
             height = this.noise2D(x * noiseScale, z * noiseScale) * (maxHeight / 4);
         }
         return height;
     }
 
     createTerrain() {
-        this.planePositions.forEach(([x, y, z]) => {
+        const tempVec3 = new THREE.Vector3();
+
+        this.planePositions.forEach(([px, py, pz]) => {
             const geometry = new THREE.PlaneGeometry(this.planeSize, this.planeSize, 100, 100);
             geometry.rotateX(-Math.PI / 2);
 
             for (let i = 0; i < geometry.attributes.position.count; i++) {
                 const vx = geometry.attributes.position.getX(i);
                 const vz = geometry.attributes.position.getZ(i);
-                const height = this.generateHeight(vx + x, vz + z);
+                const height = this.generateHeight(vx + px, vz + pz);
                 geometry.attributes.position.setY(i, height);
             }
 
@@ -224,41 +317,51 @@ export class Grassland extends terrain {
 
             const material = new THREE.MeshStandardMaterial({ map: this.groundTexture });
             const plane = new THREE.Mesh(geometry, material);
-            plane.position.set(x-9, y-2, z+2);
+            plane.position.set(px - 9, py - 2, pz + 2);
             this.scene.add(plane);
             this.planes.push(plane);
+
+            // 转为世界坐标
+            const verticesGlobal = [];
+            for (let i = 0; i < geometry.attributes.position.count; i++) {
+                tempVec3.set(
+                    geometry.attributes.position.getX(i),
+                    geometry.attributes.position.getY(i),
+                    geometry.attributes.position.getZ(i)
+                );
+                plane.localToWorld(tempVec3);
+                verticesGlobal.push(tempVec3.x, tempVec3.y, tempVec3.z);
+            }
+
+            // Grassland 带水面 => 传 waterLevel = -5, 排除 y <= -5 区域
+            scatterGrassAndFlowers(this.scene, this.textureLoader, verticesGlobal, -5);
         });
     }
 
     createWaterSurface() {
-        // 创建水面几何体
         const waterGeometry = new THREE.PlaneGeometry(this.planeSize * 3, this.planeSize * 3);
-
         const water = new Water(waterGeometry, {
             textureWidth: 512,
             textureHeight: 512,
-            waterNormals: new THREE.TextureLoader().load(
-                './Resource/waternormals.jpg',
-                function (texture) {
-                    texture.wrapS = texture.wrapT = THREE.RepeatWrapping
-                }
-            ),
+            waterNormals: new THREE.TextureLoader().load('./Resource/waternormals.jpg', texture => {
+                texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            }),
             sunDirection: new THREE.Vector3(),
             sunColor: 0xffffff,
             waterColor: 0x001e0f,
             distortionScale: 3.7,
             fog: this.scene.fog !== undefined,
-        })
+        });
 
         water.rotation.x = -Math.PI / 2;
-        water.position.y = -5; // 将水面置于河道最低位置以下
-        this.scene.add(water)
+        // 对应 generateHeight 中的“河流最低点”
+        water.position.y = -5;
+        this.scene.add(water);
 
-        function animate() {
-            requestAnimationFrame(animate)
-            water.material.uniforms['time'].value += 1.0 / 60.0
-        }
-
-        animate();
+        const animateWater = () => {
+            requestAnimationFrame(animateWater);
+            water.material.uniforms['time'].value += 1.0 / 60.0;
+        };
+        animateWater();
     }
 }
