@@ -1,12 +1,4 @@
-<h1 align = "center">需求规约</h1>
-
-<center> <b> 项目名称：青青森林 </b> </center>
-
-<center> <b> 指导教师：贾金原 </b> </center>
-
-<center> <b> 项目成员：2253333 王沫涵 <br> &emsp; &emsp; &emsp; &emsp; 2250931 李明哲 <br> &emsp; &emsp; &emsp; &emsp; 2153495 钟承哲 </b> </center>
-
-<center> <b> 任课教师：黄杰 </b></center>
+![需求](C:\Users\wang9\Desktop\大三上课程作业\32 青青森林 SRS\需求.png)
 
 [TOC]
 
