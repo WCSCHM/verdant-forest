@@ -15,8 +15,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
     const treeModels = [
         { path: './Resource/tree1-3.glb',  scale: [0.30, 0.35, 0.35], title: '榕树' },
         { path: './Resource/tree2-3.glb',  scale: [0.85, 0.85, 0.85], title: '枫树' },
-        { path: './Resource/tree3-3.glb',  scale: [0.25, 0.25, 0.25], title: '松树' },
-        { path: './Resource/tree4-3.glb',  scale: [5.5, 5.5, 5.5],   title: '大树' },
+        { path: './Resource/tree3-3.glb',  scale: [0.25, 0.25, 0.25], title: '樱树' },
+        { path: './Resource/tree4-3.glb',  scale: [5.5, 5.5, 5.5],   title: '樟树' },
         { path: './Resource/tree6-3.glb',  scale: [0.009, 0.008, 0.01], title: '盆景' },
         { path: './Resource/willow-3.glb', scale: [0.25, 0.25, 0.25], title: '柳树' },
     ];
