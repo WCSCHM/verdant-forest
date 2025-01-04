@@ -236,7 +236,7 @@ app.post('/answer', (req, res) => {
           res.status(500).json({ error: '无法更新金币' });
           return;
         }
-        res.json({ success: true, message: '��对了！金币增加10个' });
+        res.json({ success: true, message: '答对了！金币增加10个' });
       });
     } else {
       res.json({ success: false, message: '答错了，请再试一次。' });

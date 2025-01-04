@@ -651,7 +651,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
                 if (!response.ok) {
                     const errorData = await response.json();
                     if (errorData.error === '该树已种植') {
-                        alert('该树已种植');
+                      showPopup(`该树已种植`);
                     } else {
                         throw new Error(`请求失败: ${response.statusText}`);
                     }
@@ -659,11 +659,11 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
                     // 解析后端返回的 JSON 数据
                     const result = await response.json();
                     console.log('种植信息添加成功:', result);
-                    alert('种植信息添加成功！');
+                    showPopup(`种植信息添加成功！`);
                 }
             } catch (error) {
                 console.error('种植信息添加失败:', error);
-                alert('种植信息添加失败，请重试！');
+                showPopup(`种植信息添加失败，请重试！`);
             }
         });
         popupCancel.addEventListener('click', closePopup);
