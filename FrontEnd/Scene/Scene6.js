@@ -165,7 +165,7 @@ loadUserTree();
 // ------------------------------
 // 地形与天空初始化
 // ------------------------------
-const ground = new Desert(camera, scene);
+const ground = new Grassland(camera, scene);
 const mySky = new Sunset(scene, camera);
 
 // ------------------------------
