@@ -250,6 +250,46 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
     styleEl.textContent = style;
     document.head.appendChild(styleEl);
 
+    // 1) 为按钮的样式插入一段 CSS
+    document.head.insertAdjacentHTML('beforeend', `
+    <style>
+      #returnBtn {
+        position: fixed;
+        bottom: 30px;
+        left: 30px;
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #fff;
+        background: linear-gradient(45deg, #ffa500, #ff8c00);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        transition: background 0.3s, transform 0.3s;
+        z-index: 9999; /* 确保在最上层 */
+      }
+
+      #returnBtn:hover {
+        transform: scale(1.05);
+        background: linear-gradient(45deg, #ff8c00, #ff4500);
+      }
+    </style>
+    `);
+
+    // 2) 创建按钮
+    const returnBtn = document.createElement('button');
+    returnBtn.id = 'returnBtn';
+    returnBtn.textContent = '返回';
+
+    // 3) 将按钮加入到文档（添加到 body 即可）
+    document.body.appendChild(returnBtn);
+
+    // 4) 点击按钮的跳转逻辑
+    returnBtn.addEventListener('click', () => {
+        window.location.href = 'Plant.html'; // 跳转到 Plant.html
+    });
+
     /********************************************************
      *  三、主要DOM结构（背景、边框、面容器等）
      ********************************************************/

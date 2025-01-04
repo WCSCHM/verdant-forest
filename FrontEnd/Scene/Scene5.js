@@ -122,7 +122,7 @@ async function loadUserTree() {
             treeStage = data.growthStage;
             console.log(`Growth stage for tree ${chooseTree}: ${treeStage}`);
             
-            // 根据 growthStage 显示对应���树模型
+            // 根据 growthStage 显示对应树模型
             switch (treeStage) {
                 case 1:
                     if (treeStage1) {
@@ -438,3 +438,22 @@ const observer = new MutationObserver(() => {
     }
 });
 observer.observe(waterButton, { attributes: true, attributeFilter: ['style'] });
+
+// 创建返回按钮
+const returnBtn = document.createElement('button');
+returnBtn.innerText = '返回';
+returnBtn.style.position = 'absolute';
+returnBtn.style.top = '20px';
+returnBtn.style.left = '20px';
+returnBtn.style.padding = '10px 20px';
+returnBtn.style.backgroundColor = '#4CAF50';
+returnBtn.style.color = 'white';
+returnBtn.style.border = 'none';
+returnBtn.style.borderRadius = '5px';
+returnBtn.style.cursor = 'pointer';
+document.body.appendChild(returnBtn);
+
+// 返回按钮点击事件
+returnBtn.addEventListener('click', () => {
+    window.location.href = 'View.html'; // 跳转到 View.html
+});
