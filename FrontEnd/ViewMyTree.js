@@ -251,7 +251,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
     document.head.appendChild(styleEl);
 
     /********************************************************
-     *  三、主要DOM结构（背景、边框、��面容器等）
+     *  三、主要DOM结构（背景、边框、面容器等）
      ********************************************************/
         // 背景花纹
     const backgroundPattern = document.createElement('div');
@@ -328,10 +328,13 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
     const renderers = [];
 
     // 创建 6 个模型视图
-    treeModels.forEach((modelConfig, index) => {
+    treeModels.forEach(async (modelConfig, index) => {
         // 包裹每个 3D 模型的小容器
         const item = document.createElement('div');
         item.className = 'modelItem';
+
+        // 检查用户是否种植该树
+        const isPlanted = await checkIfTreePlanted(userId, index + 1); // 假设树的 ID 从 1 开始
 
         // 树名
         const treeLabel = document.createElement('div');
@@ -339,45 +342,50 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
         treeLabel.textContent = modelConfig.title || `树木 ${index + 1}`;
         item.appendChild(treeLabel);
 
-        // Three.js 场景
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
-        camera.position.set(0, 1.5, 4);
+        // 如果未种植，设置小窗口为灰色并禁用点击事件
+        if (!isPlanted) {
+            item.style.backgroundColor = 'rgba(128, 128, 128, 0.5)'; // 灰色
+            item.style.pointerEvents = 'none'; // 禁用点击事件
+        } else {
+            // Three.js 场景
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+            camera.position.set(0, 1.5, 4);
 
-        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        // 先把它加到 DOM，���后在渲染循环中会动态调整大小
-        item.appendChild(renderer.domElement);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            item.appendChild(renderer.domElement);
 
-        // 添加光源
-        const light = new THREE.DirectionalLight(0xffffff, 1);
-        light.position.set(1, 2, 3);
-        scene.add(light);
+            // 添加光源
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(1, 2, 3);
+            scene.add(light);
 
-        // 加载 glb 模型
-        const loader = new GLTFLoader();
-        loader.load(
-            modelConfig.path,
-            gltf => {
-                const model = gltf.scene;
-                const [sx, sy, sz] = modelConfig.scale;
-                model.scale.set(sx, sy, sz);
-                scene.add(model);
-            },
-            undefined,
-            error => console.error('Error loading model:', error)
-        );
+            // 加载 glb 模型
+            const loader = new GLTFLoader();
+            loader.load(
+                modelConfig.path,
+                gltf => {
+                    const model = gltf.scene;
+                    const [sx, sy, sz] = modelConfig.scale;
+                    model.scale.set(sx, sy, sz);
+                    scene.add(model);
+                },
+                undefined,
+                error => console.error('Error loading model:', error)
+            );
 
-        // 点击事件（示例）
-        item.addEventListener('click', () => {
-            console.log(`你点击了模型：${modelConfig.title}${index}`);
-            // 跳转到 Scene.html 并传递 index
-            window.location.href = `Scene.html?index=${index}`;
-        });
+            // 点击事件（示例）
+            item.addEventListener('click', () => {
+                console.log(`你点击了模型：${modelConfig.title}${index}`);
+                // 跳转到 Scene.html 并传递 index
+                window.location.href = `Scene.html?index=${index}`;
+            });
 
-        // 记录
-        scenes.push(scene);
-        cameras.push(camera);
-        renderers.push(renderer);
+            // 记录
+            scenes.push(scene);
+            cameras.push(camera);
+            renderers.push(renderer);
+        }
 
         // 追加到容器
         modelsContainer.appendChild(item);
@@ -432,5 +440,20 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
                 coinCount.textContent = '加载失败';
             }
         });
+
+    // 新增函数：检查用户是否种植该树
+    async function checkIfTreePlanted(userId, treeId) {
+        try {
+            const response = await fetch(`${apiUrl}/user-trees/${userId}/${treeId}`);
+            if (!response.ok) {
+                throw new Error('无法获取种植信息');
+            }
+            const data = await response.json();
+            return data.success; // 返回是否种植的状态
+        } catch (error) {
+            console.error('检查种植状态失败:', error.message);
+            return false; // 默认返回未种植
+        }
+    }
 
 })();
