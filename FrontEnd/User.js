@@ -197,6 +197,29 @@
       from { transform: scale(1) rotate(0deg); opacity: 0.3; }
       to { transform: scale(1.05) rotate(3deg); opacity: 0.5; }
     }
+
+    /* ==== 退出登录按钮样式 ==== */
+    #logoutBtn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #fff;
+      background: linear-gradient(45deg, #ff4500, #ff8c00);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      transition: background 0.3s, transform 0.3s;
+      z-index: 9999; /* 确保在最上层 */
+    }
+
+    #logoutBtn:hover {
+      transform: scale(1.05);
+      background: linear-gradient(45deg, #ff8c00, #ff0000);
+    }
   `;
 
   // ============== 将样式插入到页面中 ==============
@@ -305,6 +328,31 @@
   centerButtons.appendChild(plantTreeButton);
 
   fancyContainer.appendChild(centerButtons);
+
+  // ============== 创建退出登录按钮 ==============
+  const logoutBtn = document.createElement('button');
+  logoutBtn.id = 'logoutBtn';
+  logoutBtn.innerText = '退出登录';
+  logoutBtn.style.position = 'fixed';
+  logoutBtn.style.bottom = '30px';
+  logoutBtn.style.right = '30px';
+  logoutBtn.style.padding = '10px 20px';
+  logoutBtn.style.borderRadius = '8px';
+  logoutBtn.style.border = 'none';
+  logoutBtn.style.fontSize = '16px';
+  logoutBtn.style.fontWeight = 'bold';
+  logoutBtn.style.cursor = 'pointer';
+  logoutBtn.style.color = '#fff';
+  logoutBtn.style.background = 'linear-gradient(45deg, #ff4500, #ff8c00)';
+  logoutBtn.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
+  logoutBtn.style.transition = 'background 0.3s, transform 0.3s';
+  document.body.appendChild(logoutBtn);
+
+  // 退出登录按钮点击事件
+  logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('userId'); // 清除用户 ID
+      window.location.href = 'login.html'; // 跳转到登录页面
+  });
 
   // ============== 从后端获取金币数量并更新页面 ==============
   async function fetchUserCoins(userId) {
