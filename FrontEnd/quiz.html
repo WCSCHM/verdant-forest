@@ -50,6 +50,45 @@
         #closeButton:hover {
             background-color: #e53935;
         }
+        /* 自定义提示框样式 */
+        .modal {
+            display: none; /* 隐藏 */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); 
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: linear-gradient(135deg, #ffffff, #f0f0f0);
+            padding: 35px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); 
+            width: 240px;
+            
+        }
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .modal button {
+            margin: 10px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .modal button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
@@ -61,6 +100,16 @@
         <button id="optionD">选项D</button>
         <button id="closeButton">关闭</button>
     </div>
+
+    <!-- 自定义提示框 -->
+    <div class="modal" id="resultModal">
+        <div class="modal-content">
+            <h2 id="resultMessage">回答正确 金币+10</h2>
+            <button id="continueButton">继续答题</button>
+            <button id="mainMenuButton">返回主界面</button>
+        </div>
+    </div>
+
     <script>
         const userId = localStorage.getItem('userId');
         const apiUrl = 'http://localhost:3008'; // 后端 API 地址
@@ -90,13 +139,25 @@
             })
             .then(response => response.json())
             .then(data => {
-                window.location.href = 'User.html'; // 返回 User.html
-                alert(data.message);
-                if (data.success) {
-                    window.opener.fetchCoins(); // 更新金币显示
-                }
+                showResultModal(data.success, data.message);
             })
             .catch(error => console.error('Error submitting answer:', error));
+        }
+
+        function showResultModal(isCorrect, message) {
+            const resultModal = document.getElementById('resultModal');
+            const resultMessage = document.getElementById('resultMessage');
+            resultMessage.innerText = isCorrect ? '回答正确 金币+10' : '回答错误！';
+            resultModal.style.display = 'flex'; // 显示提示框
+
+            document.getElementById('continueButton').onclick = () => {
+                resultModal.style.display = 'none'; // 关闭提示框
+                loadQuestion(); // 继续加载新问题
+            };
+
+            document.getElementById('mainMenuButton').onclick = () => {
+                window.location.href = 'User.html'; // 返回主界面
+            };
         }
 
         document.getElementById('closeButton').onclick = () => window.location.href = 'User.html';
