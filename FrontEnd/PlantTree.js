@@ -438,13 +438,12 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
         // 将点击事件绑定到 item 上
         // 为轮播项绑定点击事件
-        item.addEventListener('click', () => {
+        item.addEventListener('click', async () => {
             if (typeof userCoins !== 'number') {
                 console.log('金币信息尚未加载或无效，不弹窗');
                 return;
             }
 
-            // 当前点击框的索引
             const treeIndex = index % treeModels.length; // 计算在 treeModels 数组中的索引
             const treeConfig = treeModels[treeIndex]; // 获取对应的树模型配置
             const treeId = treeIndex + 1; // tree_id 为索引 + 1（假设从 1 开始编号）
@@ -630,41 +629,58 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
         popupConfirm?.addEventListener('click', async () => {
             console.log('点击了确定');
             closePopup();
-            // 构造需要发送的请求数据
-            const requestData = {
-                user_id: userId, // 替换为实际的用户 ID
-                tree_id: treeId, // 替换为实际的树 ID
-                is_planted: 1, // 设置为已种植
-                growth_stage: 1 // 设置为初始生长阶段
+
+            // 扣除金币
+            const deductCoins = async (userId) => {
+                try {
+                    const response = await fetch(`${apiUrl}/users/${userId}/coins`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ amount: -50 }) // 扣除 50 个金币
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('无法扣除金币');
+                    }
+
+                    // 继续种植树木的逻辑
+                    const requestData = {
+                        user_id: userId,
+                        tree_id: treeId,
+                        is_planted: 1,
+                        growth_stage: 1
+                    };
+
+                    const plantResponse = await fetch(`${apiUrl}/user-trees`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestData)
+                    });
+
+                    if (!plantResponse.ok) {
+                        const errorData = await plantResponse.json();
+                        if (errorData.error === '该树已种植') {
+                            showPopup(`该树已种植`);
+                        } else {
+                            throw new Error(`请求失败: ${plantResponse.statusText}`);
+                        }
+                    } else {
+                        const result = await plantResponse.json();
+                        console.log('种植信息添加成功:', result);
+                        showPopup(`种植信息添加成功！`);
+                    }
+                } catch (error) {
+                    console.error('扣除金币失败:', error);
+                    showPopup(`扣除金币失败，请重试！`);
+                }
             };
 
-            try {
-                // 调用后端接口
-                const response = await fetch(`${apiUrl}/user-trees`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(requestData)
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    if (errorData.error === '该树已种植') {
-                      showPopup(`该树已种植`);
-                    } else {
-                        throw new Error(`请求失败: ${response.statusText}`);
-                    }
-                } else {
-                    // 解析后端返回的 JSON 数据
-                    const result = await response.json();
-                    console.log('种植信息添加成功:', result);
-                    showPopup(`种植信息添加成功！`);
-                }
-            } catch (error) {
-                console.error('种植信息添加失败:', error);
-                showPopup(`种植信息添加失败，请重试！`);
-            }
+            // 扣除金币
+            await deductCoins(userId);
         });
         popupCancel.addEventListener('click', closePopup);
 
